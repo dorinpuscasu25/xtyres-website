@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: xtyres-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: xtyres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d xtyres']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./xtyres-backend
+      dockerfile: Dockerfile
+    container_name: xtyres-backend
+    restart: unless-stopped
+    working_dir: /var/www/html
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '8000:8000'
+      - '5173:5173'
+    environment:
+      APP_NAME: XTyres
+      APP_ENV: local
+      APP_KEY: base64:QnmqNRxeS4giSLZ34SNsnJz1o6oMfj2nb81ak5/4Ktc=
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost:8000
+      APP_LOCALE: ro
+      APP_FALLBACK_LOCALE: ru
+      APP_FAKER_LOCALE: ro_MD
+      APP_TIMEZONE: Europe/Chisinau
+      LOG_CHANNEL: stack
+      LOG_STACK: single
+      LOG_LEVEL: debug
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: xtyres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      SESSION_DRIVER: database
+      SESSION_LIFETIME: 120
+      SESSION_ENCRYPT: 'false'
+      SESSION_PATH: /
+      SESSION_DOMAIN: null
+      BROADCAST_CONNECTION: log
+      FILESYSTEM_DISK: local
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      FRONTEND_URL: http://localhost:5174
+      ADMIN_EMAIL: admin@xtyres.local
+      ADMIN_PASSWORD: password
+      APP_PORT: 8000
+      VITE_HOST: 0.0.0.0
+      VITE_PORT: 5173
+      VITE_HMR_HOST: localhost
+      VITE_DEV_SERVER_URL: http://localhost:5173
+      VITE_USE_POLLING: 'true'
+    volumes:
+      - ./xtyres-backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+      - backend_node_modules:/var/www/html/node_modules
+    command: ['sh', 'docker/start.sh']
+
+  frontend:
+    build:
+      context: ./xtyres-frontend
+      dockerfile: Dockerfile
+    container_name: xtyres-frontend
+    restart: unless-stopped
+    working_dir: /app
+    depends_on:
+      - backend
+    ports:
+      - '5174:5174'
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000/api/storefront
+      VITE_HOST: 0.0.0.0
+      VITE_PORT: 5174
+      VITE_HMR_HOST: localhost
+      VITE_USE_POLLING: 'true'
+    volumes:
+      - ./xtyres-frontend:/app
+      - frontend_node_modules:/app/node_modules
+    command: ['sh', 'docker/start.sh']
+
+volumes:
+  postgres_data:
+  backend_vendor:
+  backend_node_modules:
+  frontend_node_modules:
