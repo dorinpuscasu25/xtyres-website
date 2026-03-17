@@ -17,8 +17,6 @@ if [ ! -L public/storage ] && [ ! -e public/storage ]; then
   php artisan storage:link
 fi
 
-php artisan optimize:clear
-
 until php artisan migrate --force --no-interaction; do
   echo "Waiting for PostgreSQL to be ready..."
   sleep 2
