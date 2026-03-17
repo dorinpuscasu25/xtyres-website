@@ -13,6 +13,7 @@ export default defineConfig({
     host: viteHost,
     port: vitePort,
     strictPort: true,
+    allowedHosts: true,
     hmr: {
       host: viteHmrHost,
       clientPort: vitePort,
@@ -23,5 +24,10 @@ export default defineConfig({
           interval: 300,
         }
       : undefined,
+  },
+  preview: {
+    host: viteHost,
+    port: vitePort,
+    strictPort: true,
   },
 })
