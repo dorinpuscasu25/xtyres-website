@@ -35,6 +35,7 @@ export default defineConfig({
         port: vitePort,
         strictPort: true,
         origin: viteOrigin,
+        cors: true,
         hmr: {
             host: viteHmrHost,
             clientPort: vitePort,

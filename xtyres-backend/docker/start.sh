@@ -7,9 +7,22 @@ export DB_CONNECTION="${DB_CONNECTION:-sqlite}"
 export APP_PORT="${APP_PORT:-8000}"
 export VITE_HOST="${VITE_HOST:-0.0.0.0}"
 export VITE_PORT="${VITE_PORT:-5173}"
-export VITE_HMR_HOST="${VITE_HMR_HOST:-localhost}"
-export VITE_DEV_SERVER_URL="${VITE_DEV_SERVER_URL:-http://localhost:${VITE_PORT}}"
 export VITE_USE_POLLING="${VITE_USE_POLLING:-true}"
+
+app_url="${APP_URL:-http://localhost:${APP_PORT}}"
+app_host="$(printf '%s' "${app_url}" | sed -E 's#^[a-zA-Z]+://([^/:]+).*$#\1#')"
+
+if [ -z "${VITE_HMR_HOST:-}" ]; then
+  export VITE_HMR_HOST="${app_host:-localhost}"
+else
+  export VITE_HMR_HOST
+fi
+
+if [ -z "${VITE_DEV_SERVER_URL:-}" ]; then
+  export VITE_DEV_SERVER_URL="http://${VITE_HMR_HOST}:${VITE_PORT}"
+else
+  export VITE_DEV_SERVER_URL
+fi
 
 if [ "${DB_CONNECTION}" = "sqlite" ]; then
   export DB_DATABASE="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
