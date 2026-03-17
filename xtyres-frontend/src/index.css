@@ -1,0 +1,76 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700;800&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans text-slate-900 bg-slate-50;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+/* Custom Range Slider Styles */
+.range-slider {
+  position: relative;
+  width: 100%;
+  height: 24px;
+}
+.range-slider input[type="range"] {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  top: 10px;
+  background: none;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+  z-index: 2;
+}
+.range-slider input[type="range"]::-webkit-slider-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #f4c70b;
+  cursor: pointer;
+  -webkit-appearance: none;
+  pointer-events: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: 2px solid white;
+}
+.range-slider input[type="range"]::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: #f4c70b;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border: 2px solid white;
+}
+.range-track {
+  position: absolute;
+  width: 100%;
+  height: 4px;
+  top: 10px;
+  background-color: #e2e8f0;
+  border-radius: 2px;
+  z-index: 1;
+}
+.range-fill {
+  position: absolute;
+  height: 4px;
+  top: 10px;
+  background-color: #f4c70b;
+  border-radius: 2px;
+  z-index: 1;
+}
