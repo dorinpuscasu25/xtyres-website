@@ -1,26 +1,4 @@
 services:
-  # postgres:
-  #   image: postgres:16-alpine
-  #   container_name: xtyres-backend-postgres
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   entrypoint:
-  #     - sh
-  #     - /usr/local/bin/postgres-entrypoint.sh
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #     - ./docker/postgres-entrypoint.sh:/usr/local/bin/postgres-entrypoint.sh:ro
-  #   healthcheck:
-  #     test:
-  #       - CMD-SHELL
-  #       - pg_isready -U "$${POSTGRES_USER:-$${DB_USERNAME:-postgres}}" -d "$${POSTGRES_DB:-$${DB_DATABASE:-xtyres}}"
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 20
-
   app:
     build:
       context: .
@@ -30,9 +8,6 @@ services:
     working_dir: /var/www/html
     env_file:
       - .env
-    # depends_on:
-    #   postgres:
-    #     condition: service_healthy
     ports:
       - '8000:8000'
       - '5173:5173'
@@ -45,6 +20,5 @@ services:
       - docker/start.sh
 
 volumes:
-  postgres_data:
   backend_vendor:
   backend_node_modules:
