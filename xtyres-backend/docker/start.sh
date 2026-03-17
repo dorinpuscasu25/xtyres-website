@@ -8,6 +8,7 @@ export APP_PORT="${APP_PORT:-8000}"
 export VITE_HOST="${VITE_HOST:-0.0.0.0}"
 export VITE_PORT="${VITE_PORT:-5173}"
 export VITE_USE_POLLING="${VITE_USE_POLLING:-true}"
+export VITE_USE_DEV_SERVER="${VITE_USE_DEV_SERVER:-true}"
 
 app_url="${APP_URL:-http://localhost:${APP_PORT}}"
 app_host="$(printf '%s' "${app_url}" | sed -E 's#^[a-zA-Z]+://([^/:]+).*$#\1#')"
@@ -66,9 +67,16 @@ fi
 
 php artisan db:seed --class=Database\\Seeders\\AdminUserSeeder --force --no-interaction
 
-exec npx concurrently \
-  -k \
-  -n app,vite \
-  -c "#93c5fd,#fb7185" \
-  "php artisan serve --host=0.0.0.0 --port=${APP_PORT}" \
-  "npm run dev -- --host ${VITE_HOST} --port ${VITE_PORT} --strictPort"
+if [ "${VITE_USE_DEV_SERVER}" = "true" ]; then
+  exec npx concurrently \
+    -k \
+    -n app,vite \
+    -c "#93c5fd,#fb7185" \
+    "php artisan serve --host=0.0.0.0 --port=${APP_PORT}" \
+    "npm run dev -- --host ${VITE_HOST} --port ${VITE_PORT} --strictPort"
+fi
+
+rm -f public/hot
+npm run build
+
+exec php artisan serve --host=0.0.0.0 --port="${APP_PORT}"
