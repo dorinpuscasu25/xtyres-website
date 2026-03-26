@@ -30,16 +30,8 @@ if [ "${DB_CONNECTION}" = "sqlite" ]; then
   mkdir -p "$(dirname "${DB_DATABASE}")"
   touch "${DB_DATABASE}"
 elif [ "${DB_CONNECTION}" = "pgsql" ]; then
-  case "${DB_HOST:-}" in
-    ""|"127.0.0.1"|"localhost")
-      export DB_HOST=postgres
-      ;;
-  esac
-
+  export DB_HOST="${DB_HOST:-postgres}"
   export DB_PORT="${DB_PORT:-5432}"
-  export DB_DATABASE="${DB_DATABASE:-xtyres}"
-  export DB_USERNAME="${DB_USERNAME:-postgres}"
-  export DB_PASSWORD="${DB_PASSWORD:-postgres}"
 fi
 
 if [ ! -f vendor/autoload.php ] || [ composer.lock -nt vendor/autoload.php ]; then
