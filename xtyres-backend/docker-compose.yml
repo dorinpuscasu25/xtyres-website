@@ -18,6 +18,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - backend
     command:
       - sh
       - docker/start.sh
@@ -39,6 +41,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
 
 volumes:
   backend_vendor:
