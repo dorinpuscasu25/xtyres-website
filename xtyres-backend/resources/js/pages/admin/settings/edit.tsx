@@ -9,6 +9,7 @@ import { FlashMessage } from '@/components/admin/flash-message';
 import { PageHeader } from '@/components/admin/page-header';
 import { TranslationFields } from '@/components/admin/translation-fields';
 import { TranslationLocaleTabs } from '@/components/admin/translation-locale-tabs';
+import InputError from '@/components/input-error';
 import type { BreadcrumbItem } from '@/types';
 
 type SocialLink = {
@@ -279,6 +280,7 @@ export default function SettingsEdit({ settings }: Props) {
                             value={form.data.map_embed_url}
                             onChange={(event) => form.setData('map_embed_url', event.target.value)}
                         />
+                        <InputError message={errors.map_embed_url} />
                     </div>
                 </Card>
 
@@ -286,6 +288,7 @@ export default function SettingsEdit({ settings }: Props) {
                     <div className="space-y-4">
                         <Label htmlFor="header_logo">Logo header</Label>
                         <Input id="header_logo" type="file" accept="image/*" onChange={onFileChange('header_logo')} />
+                        <InputError message={errors.header_logo} />
                         {headerPreview ? (
                             <img src={headerPreview} alt="Header logo" className="h-24 rounded-xl border border-border object-cover" />
                         ) : null}
@@ -304,6 +307,7 @@ export default function SettingsEdit({ settings }: Props) {
                     <div className="space-y-4">
                         <Label htmlFor="footer_logo">Logo footer</Label>
                         <Input id="footer_logo" type="file" accept="image/*" onChange={onFileChange('footer_logo')} />
+                        <InputError message={errors.footer_logo} />
                         {footerPreview ? (
                             <img src={footerPreview} alt="Footer logo" className="h-24 rounded-xl border border-border object-cover" />
                         ) : null}
