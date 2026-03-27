@@ -1,5 +1,14 @@
 import { Link } from '@inertiajs/react';
-import { Boxes, LayoutGrid, PanelsTopLeft, ReceiptText, Settings, Shapes, Tags } from 'lucide-react';
+import {
+    Boxes,
+    LayoutGrid,
+    PanelsTopLeft,
+    ReceiptText,
+    Settings,
+    Shapes,
+    Tags,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -47,6 +56,11 @@ const mainNavItems: NavItem[] = [
         icon: ReceiptText,
     },
     {
+        title: 'Administratori',
+        href: '/admin/users',
+        icon: Users,
+    },
+    {
         title: 'Setări',
         href: '/admin/settings',
         icon: Settings,
@@ -63,7 +77,7 @@ const footerNavItems: NavItem[] = [
 
 export function AppSidebar() {
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="inset" className="print:hidden">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AttributeOptionController;
 use App\Http\Controllers\Admin\BrandController;
@@ -58,6 +59,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::put('orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+
+        Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('users', [AdminUserController::class, 'store'])->name('users.store');
 
         Route::get('settings', [StoreSettingsController::class, 'edit'])->name('settings.edit');
         Route::put('settings', [StoreSettingsController::class, 'update'])->name('settings.update');
