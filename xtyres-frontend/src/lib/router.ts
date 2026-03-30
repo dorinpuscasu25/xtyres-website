@@ -33,6 +33,14 @@ const emptyRouteState = {
   priceMax: null,
 };
 
+function normalizePathname(pathname: string) {
+  if (pathname.length > 1 && pathname.endsWith('/')) {
+    return pathname.replace(/\/+$/, '');
+  }
+
+  return pathname;
+}
+
 function parseNumber(value: string | null): number | null {
   if (!value) {
     return null;
@@ -69,10 +77,16 @@ function parseFilters(value: string | null): CatalogRequestFilter[] {
   }
 }
 
-export function buildProductPath(productId: number, productSlug?: string) {
-  const suffix = productSlug ? `-${encodeURIComponent(productSlug)}` : '';
+export function buildProductPath(productId?: number, productSlug?: string) {
+  if (productSlug) {
+    return `/produs/${encodeURIComponent(productSlug)}`;
+  }
 
-  return `/products/${productId}${suffix}`;
+  if (productId) {
+    return `/produs/${productId}`;
+  }
+
+  return '/products';
 }
 
 export function parseCurrentRoute(): AppRoute {
@@ -87,17 +101,38 @@ export function parseCurrentRoute(): AppRoute {
 }
 
 export function parseRoute(pathname: string, search: string): AppRoute {
+  const normalizedPathname = normalizePathname(pathname);
   const params = new URLSearchParams(search);
   const requestedPage = Number(params.get('page') || '1');
 
-  if (pathname === '/') {
+  if (normalizedPathname === '/') {
     return {
       page: 'home',
       ...emptyRouteState,
     };
   }
 
-  if (pathname === '/products') {
+  if (normalizedPathname === '/shop') {
+    return {
+      page: 'products',
+      categorySlug: 'anvelope',
+      ...emptyRouteState,
+    };
+  }
+
+  if (normalizedPathname.startsWith('/product-category/')) {
+    const categorySlug = decodeURIComponent(
+      normalizedPathname.replace('/product-category/', ''),
+    );
+
+    return {
+      page: 'products',
+      categorySlug: categorySlug || undefined,
+      ...emptyRouteState,
+    };
+  }
+
+  if (normalizedPathname === '/products') {
     return {
       page: 'products',
       categorySlug: params.get('category') || undefined,
@@ -111,8 +146,20 @@ export function parseRoute(pathname: string, search: string): AppRoute {
     };
   }
 
-  if (pathname.startsWith('/products/')) {
-    const segment = decodeURIComponent(pathname.replace('/products/', ''));
+  if (normalizedPathname.startsWith('/produs/')) {
+    const segment = decodeURIComponent(normalizedPathname.replace('/produs/', ''));
+
+    if (segment) {
+      return {
+        page: 'product-detail',
+        productSlug: segment,
+        ...emptyRouteState,
+      };
+    }
+  }
+
+  if (normalizedPathname.startsWith('/products/')) {
+    const segment = decodeURIComponent(normalizedPathname.replace('/products/', ''));
     const match = segment.match(/^(\d+)(?:-(.+))?$/);
 
     if (match) {
@@ -123,21 +170,29 @@ export function parseRoute(pathname: string, search: string): AppRoute {
         ...emptyRouteState,
       };
     }
+
+    if (segment) {
+      return {
+        page: 'product-detail',
+        productSlug: segment,
+        ...emptyRouteState,
+      };
+    }
   }
 
-  if (pathname === '/contact') {
+  if (normalizedPathname === '/contacts' || normalizedPathname === '/contact') {
     return { page: 'contact', ...emptyRouteState };
   }
 
-  if (pathname === '/about') {
+  if (normalizedPathname === '/despre' || normalizedPathname === '/about') {
     return { page: 'about', ...emptyRouteState };
   }
 
-  if (pathname === '/cart') {
+  if (normalizedPathname === '/cart') {
     return { page: 'cart', ...emptyRouteState };
   }
 
-  if (pathname === '/checkout') {
+  if (normalizedPathname === '/checkout') {
     return { page: 'checkout', ...emptyRouteState };
   }
 
@@ -192,16 +247,16 @@ export function buildRouteUrl(route: AppRoute): string {
     return query ? `/products?${query}` : '/products';
   }
 
-  if (route.page === 'product-detail' && route.productId) {
+  if (route.page === 'product-detail' && (route.productSlug || route.productId)) {
     return buildProductPath(route.productId, route.productSlug);
   }
 
   if (route.page === 'contact') {
-    return '/contact';
+    return '/contacts';
   }
 
   if (route.page === 'about') {
-    return '/about';
+    return '/despre';
   }
 
   if (route.page === 'cart') {

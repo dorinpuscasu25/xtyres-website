@@ -12,16 +12,21 @@ use App\Models\Product;
 use App\Models\ProductAttributeValue;
 use App\Models\ProductImage;
 use App\Models\StoreSetting;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Support\TelegramOrderNotifier;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class StorefrontController extends Controller
 {
+    public function __construct(
+        private readonly TelegramOrderNotifier $telegramOrderNotifier,
+    ) {}
+
     public function bootstrap(Request $request): JsonResponse
     {
         $locale = $this->resolveLocale($request);
@@ -349,6 +354,10 @@ class StorefrontController extends Controller
 
             return $order;
         });
+
+        $this->telegramOrderNotifier->sendNewOrderNotification(
+            $order->load('items')
+        );
 
         return response()->json([
             'order' => [

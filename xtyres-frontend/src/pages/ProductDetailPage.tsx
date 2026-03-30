@@ -42,7 +42,7 @@ export function ProductDetailPage({
   const [reviewEmail, setReviewEmail] = useState('');
   const [reviewText, setReviewText] = useState('');
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
-  const productKey = productId ?? productSlug;
+  const productKey = productSlug ?? productId;
   const preparedDescription = useMemo(
     () => prepareRichText(product?.description),
     [product?.description]
@@ -72,7 +72,7 @@ export function ProductDetailPage({
     }, true);
     setActiveImage(product.gallery?.[0] || product.imageUrl || null);
   }, [product]);
-  const productReviews = getReviews(productId || 0);
+  const productReviews = getReviews(product?.id ?? productId ?? 0);
   const getBadgeColor = (badge: string | null) => {
     switch (badge) {
       case 'Nou':

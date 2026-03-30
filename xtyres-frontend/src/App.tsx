@@ -55,7 +55,11 @@ export function App() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [route.page, route.productId, route.categorySlug, route.query]);
+  }, [route.page, route.productId, route.productSlug, route.categorySlug, route.query]);
+
+  useEffect(() => {
+    updateBrowserUrl(route, true);
+  }, [route]);
 
   const handleNavigate = (
     page: string,
