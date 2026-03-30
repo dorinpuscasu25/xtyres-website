@@ -4,7 +4,10 @@ namespace App\Support;
 
 use App\Models\Order;
 use App\Models\OrderItem;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
+use Telegram\Bot\Exceptions\TelegramResponseException;
+use Telegram\Bot\HttpClients\HttpClientInterface;
 use Throwable;
 
 class TelegramOrderNotifier
@@ -13,30 +16,89 @@ class TelegramOrderNotifier
 
     private const CHAT_ID = '-583530233';
 
+    private const CONNECT_TIMEOUT_SECONDS = 10;
+
+    private const REQUEST_TIMEOUT_SECONDS = 10;
+
+    private const MAX_ATTEMPTS = 3;
+
     public function sendNewOrderNotification(Order $order): void
     {
-        try {
-            $response = Http::asForm()
-                ->timeout(10)
-                ->retry(2, 500)
-                ->post($this->endpoint(), [
+        $order = $order->loadMissing('items');
+        $payload = $this->payload($order);
+
+        for ($attempt = 1; $attempt <= self::MAX_ATTEMPTS; $attempt++) {
+            try {
+                $message = $this->createTelegramApi()->sendMessage($payload);
+
+                Log::info('Telegram notification sent.', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
                     'chat_id' => self::CHAT_ID,
-                    'text' => $this->buildMessage($order->loadMissing('items')),
-                    'parse_mode' => 'HTML',
-                    'disable_web_page_preview' => true,
+                    'telegram_message_id' => $message->messageId,
                 ]);
 
-            if ($response->failed()) {
-                report(new \RuntimeException('Telegram notification failed: '.$response->body()));
+                return;
+            } catch (TelegramResponseException $exception) {
+                if ($attempt < self::MAX_ATTEMPTS && $this->shouldRetry($exception->getHttpStatusCode())) {
+                    continue;
+                }
+
+                Log::error('Telegram notification failed.', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'chat_id' => self::CHAT_ID,
+                    'status' => $exception->getHttpStatusCode(),
+                    'body' => $exception->getRawResponse(),
+                    'message' => $exception->getMessage(),
+                ]);
+
+                return;
+            } catch (Throwable $exception) {
+                if ($attempt < self::MAX_ATTEMPTS) {
+                    continue;
+                }
+
+                Log::error('Telegram notification exception.', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'chat_id' => self::CHAT_ID,
+                    'message' => $exception->getMessage(),
+                ]);
+
+                report($exception);
+
+                return;
             }
-        } catch (Throwable $exception) {
-            report($exception);
         }
     }
 
-    private function endpoint(): string
+    protected function createTelegramApi(): Api
     {
-        return 'https://api.telegram.org/bot'.self::BOT_TOKEN.'/sendMessage';
+        return tap(new Api(self::BOT_TOKEN, false, $this->resolveHttpClientHandler()), function (Api $telegram): void {
+            $telegram->setTimeOut(self::REQUEST_TIMEOUT_SECONDS);
+            $telegram->setConnectTimeOut(self::CONNECT_TIMEOUT_SECONDS);
+        });
+    }
+
+    protected function resolveHttpClientHandler(): ?HttpClientInterface
+    {
+        return null;
+    }
+
+    private function shouldRetry(?int $statusCode): bool
+    {
+        return $statusCode === null || $statusCode === 429 || $statusCode >= 500;
+    }
+
+    private function payload(Order $order): array
+    {
+        return [
+            'chat_id' => self::CHAT_ID,
+            'text' => $this->buildMessage($order),
+            'parse_mode' => 'HTML',
+            'disable_web_page_preview' => true,
+        ];
     }
 
     private function buildMessage(Order $order): string
