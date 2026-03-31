@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
+use Inertia\Support\Header;
 use Laravel\Fortify\Features;
 use Tests\TestCase;
 
@@ -32,6 +33,25 @@ class AuthenticationTest extends TestCase
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('admin.dashboard', absolute: false));
+    }
+
+    public function test_inertia_login_requests_receive_a_location_redirect_on_success(): void
+    {
+        $user = User::factory()->create([
+            'is_admin' => true,
+        ]);
+
+        $response = $this->withHeaders([
+            Header::INERTIA => 'true',
+            'X-Requested-With' => 'XMLHttpRequest',
+        ])->post(route('login.store'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertStatus(409);
+        $response->assertHeader(Header::LOCATION, route('admin.dashboard'));
     }
 
     public function test_users_with_two_factor_enabled_are_redirected_to_two_factor_challenge()
