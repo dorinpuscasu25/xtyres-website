@@ -1,5 +1,5 @@
-import { FormEvent } from 'react';
-import { Head, useForm } from '@inertiajs/react';
+import { FormEvent, useMemo, useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -15,6 +15,8 @@ type AdminUser = {
     name: string;
     email: string;
     created_at: string | null;
+    is_current_user: boolean;
+    can_delete: boolean;
 };
 
 type Props = {
@@ -27,18 +29,87 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AdminUsersIndex({ users }: Props) {
-    const form = useForm({
+    const [editingUserId, setEditingUserId] = useState<number | null>(null);
+    const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
+
+    const createForm = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
     });
 
-    const submit = (event: FormEvent) => {
+    const editForm = useForm({
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+    });
+
+    const editingUser = useMemo(
+        () => users.find((user) => user.id === editingUserId) ?? null,
+        [editingUserId, users],
+    );
+
+    const submitCreate = (event: FormEvent) => {
         event.preventDefault();
 
-        form.post('/admin/users', {
-            onSuccess: () => form.reset(),
+        createForm.post('/admin/users', {
+            onSuccess: () => createForm.reset(),
+        });
+    };
+
+    const startEditing = (user: AdminUser) => {
+        setEditingUserId(user.id);
+        editForm.clearErrors();
+        editForm.setData({
+            name: user.name,
+            email: user.email,
+            password: '',
+            password_confirmation: '',
+        });
+    };
+
+    const cancelEditing = () => {
+        setEditingUserId(null);
+        editForm.reset();
+        editForm.clearErrors();
+    };
+
+    const submitEdit = (event: FormEvent) => {
+        event.preventDefault();
+
+        if (!editingUserId) {
+            return;
+        }
+
+        editForm.put(`/admin/users/${editingUserId}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                editForm.reset('password', 'password_confirmation');
+            },
+        });
+    };
+
+    const removeUser = (user: AdminUser) => {
+        if (!user.can_delete) {
+            return;
+        }
+
+        if (!window.confirm(`Sigur vrei să ștergi administratorul ${user.email}?`)) {
+            return;
+        }
+
+        setDeletingUserId(user.id);
+
+        router.delete(`/admin/users/${user.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (editingUserId === user.id) {
+                    cancelEditing();
+                }
+            },
+            onFinish: () => setDeletingUserId(null),
         });
     };
 
@@ -54,91 +125,231 @@ export default function AdminUsersIndex({ users }: Props) {
                     description="Adaugă conturi noi de admin și vezi rapid cine are acces la panoul de administrare."
                 />
 
-                <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-                    <Card className="space-y-5 p-6">
-                        <div className="space-y-1">
-                            <h2 className="text-lg font-semibold">
-                                Adaugă administrator
-                            </h2>
-                            <p className="text-sm text-muted-foreground">
-                                Contul creat va putea intra în sistem cu email
-                                și parolă.
-                            </p>
-                        </div>
-
-                        <form onSubmit={submit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Nume</Label>
-                                <Input
-                                    id="name"
-                                    value={form.data.name}
-                                    onChange={(event) =>
-                                        form.setData('name', event.target.value)
-                                    }
-                                    placeholder="Opțional, de exemplu Ion Popescu"
-                                />
-                                <InputError message={form.errors.name} />
+                <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+                    <div className="space-y-6">
+                        <Card className="space-y-5 p-6">
+                            <div className="space-y-1">
+                                <h2 className="text-lg font-semibold">
+                                    Adaugă administrator
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Contul creat va putea intra în sistem cu
+                                    email și parolă.
+                                </p>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    value={form.data.email}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'email',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="admin@xtyres.md"
-                                />
-                                <InputError message={form.errors.email} />
+                            <form
+                                onSubmit={submitCreate}
+                                className="space-y-4"
+                            >
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Nume</Label>
+                                    <Input
+                                        id="name"
+                                        value={createForm.data.name}
+                                        onChange={(event) =>
+                                            createForm.setData(
+                                                'name',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Opțional, de exemplu Ion Popescu"
+                                    />
+                                    <InputError
+                                        message={createForm.errors.name}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        value={createForm.data.email}
+                                        onChange={(event) =>
+                                            createForm.setData(
+                                                'email',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="admin@xtyres.md"
+                                    />
+                                    <InputError
+                                        message={createForm.errors.email}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Parolă</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        value={createForm.data.password}
+                                        onChange={(event) =>
+                                            createForm.setData(
+                                                'password',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Minim 8 caractere"
+                                    />
+                                    <InputError
+                                        message={createForm.errors.password}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="password_confirmation">
+                                        Confirmă parola
+                                    </Label>
+                                    <Input
+                                        id="password_confirmation"
+                                        type="password"
+                                        value={
+                                            createForm.data
+                                                .password_confirmation
+                                        }
+                                        onChange={(event) =>
+                                            createForm.setData(
+                                                'password_confirmation',
+                                                event.target.value,
+                                            )
+                                        }
+                                        placeholder="Reintrodu parola"
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    disabled={createForm.processing}
+                                >
+                                    {createForm.processing
+                                        ? 'Se adaugă...'
+                                        : 'Adaugă administrator'}
+                                </Button>
+                            </form>
+                        </Card>
+
+                        <Card className="space-y-5 p-6">
+                            <div className="space-y-1">
+                                <h2 className="text-lg font-semibold">
+                                    {editingUser
+                                        ? `Editează: ${editingUser.email}`
+                                        : 'Editează administrator'}
+                                </h2>
+                                <p className="text-sm text-muted-foreground">
+                                    Selectează un administrator din listă ca să
+                                    îi schimbi emailul sau parola.
+                                </p>
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Parolă</Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    value={form.data.password}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'password',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Minim 8 caractere"
-                                />
-                                <InputError message={form.errors.password} />
-                            </div>
+                            {editingUser ? (
+                                <form onSubmit={submitEdit} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-name">Nume</Label>
+                                        <Input
+                                            id="edit-name"
+                                            value={editForm.data.name}
+                                            onChange={(event) =>
+                                                editForm.setData(
+                                                    'name',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Numele administratorului"
+                                        />
+                                        <InputError
+                                            message={editForm.errors.name}
+                                        />
+                                    </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="password_confirmation">
-                                    Confirmă parola
-                                </Label>
-                                <Input
-                                    id="password_confirmation"
-                                    type="password"
-                                    value={form.data.password_confirmation}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'password_confirmation',
-                                            event.target.value,
-                                        )
-                                    }
-                                    placeholder="Reintrodu parola"
-                                />
-                            </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-email">Email</Label>
+                                        <Input
+                                            id="edit-email"
+                                            type="email"
+                                            value={editForm.data.email}
+                                            onChange={(event) =>
+                                                editForm.setData(
+                                                    'email',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="admin@xtyres.md"
+                                        />
+                                        <InputError
+                                            message={editForm.errors.email}
+                                        />
+                                    </div>
 
-                            <Button type="submit" disabled={form.processing}>
-                                {form.processing
-                                    ? 'Se adaugă...'
-                                    : 'Adaugă administrator'}
-                            </Button>
-                        </form>
-                    </Card>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-password">
+                                            Parolă nouă
+                                        </Label>
+                                        <Input
+                                            id="edit-password"
+                                            type="password"
+                                            value={editForm.data.password}
+                                            onChange={(event) =>
+                                                editForm.setData(
+                                                    'password',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Lasă gol dacă nu vrei să o schimbi"
+                                        />
+                                        <InputError
+                                            message={editForm.errors.password}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-password_confirmation">
+                                            Confirmă parola nouă
+                                        </Label>
+                                        <Input
+                                            id="edit-password_confirmation"
+                                            type="password"
+                                            value={
+                                                editForm.data
+                                                    .password_confirmation
+                                            }
+                                            onChange={(event) =>
+                                                editForm.setData(
+                                                    'password_confirmation',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            placeholder="Completează doar dacă schimbi parola"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-3">
+                                        <Button
+                                            type="submit"
+                                            disabled={editForm.processing}
+                                        >
+                                            {editForm.processing
+                                                ? 'Se salvează...'
+                                                : 'Salvează modificările'}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={cancelEditing}
+                                        >
+                                            Renunță
+                                        </Button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="rounded-xl border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
+                                    Apasă pe butonul „Editează” din dreptul unui
+                                    administrator ca să îi modifici datele.
+                                </div>
+                            )}
+                        </Card>
+                    </div>
 
                     <Card className="overflow-hidden">
                         <div className="border-b border-border px-6 py-4">
@@ -163,6 +374,9 @@ export default function AdminUsersIndex({ users }: Props) {
                                         <th className="px-6 py-3 text-left font-medium text-muted-foreground">
                                             Rol
                                         </th>
+                                        <th className="px-6 py-3 text-left font-medium text-muted-foreground">
+                                            Acțiuni
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -185,13 +399,59 @@ export default function AdminUsersIndex({ users }: Props) {
                                                     <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700">
                                                         Administrator
                                                     </span>
+                                                    {user.is_current_user ? (
+                                                        <span className="ml-2 inline-flex rounded-full bg-sky-100 px-2.5 py-1 text-xs font-medium text-sky-700">
+                                                            Tu
+                                                        </span>
+                                                    ) : null}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="outline"
+                                                            onClick={() =>
+                                                                startEditing(
+                                                                    user,
+                                                                )
+                                                            }
+                                                        >
+                                                            Editează
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            size="sm"
+                                                            variant="destructive"
+                                                            disabled={
+                                                                !user.can_delete ||
+                                                                deletingUserId ===
+                                                                    user.id
+                                                            }
+                                                            onClick={() =>
+                                                                removeUser(user)
+                                                            }
+                                                        >
+                                                            {deletingUserId ===
+                                                            user.id
+                                                                ? 'Se șterge...'
+                                                                : 'Șterge'}
+                                                        </Button>
+                                                    </div>
+                                                    {!user.can_delete ? (
+                                                        <p className="mt-2 text-xs text-muted-foreground">
+                                                            {user.is_current_user
+                                                                ? 'Contul tău nu poate fi șters din această pagină.'
+                                                                : 'Trebuie să rămână cel puțin un administrator activ.'}
+                                                        </p>
+                                                    ) : null}
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
                                             <td
-                                                colSpan={4}
+                                                colSpan={5}
                                                 className="px-6 py-8 text-center text-muted-foreground"
                                             >
                                                 Nu există încă alți

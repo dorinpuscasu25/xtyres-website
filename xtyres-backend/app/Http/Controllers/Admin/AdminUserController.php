@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,17 +19,23 @@ class AdminUserController extends Controller
 
     public function index(): Response
     {
+        $users = User::query()
+            ->where('is_admin', true)
+            ->orderBy('name')
+            ->orderBy('email')
+            ->get();
+        $adminCount = $users->count();
+        $currentUserId = auth()->id();
+
         return Inertia::render('admin/users/index', [
-            'users' => User::query()
-                ->where('is_admin', true)
-                ->orderBy('name')
-                ->orderBy('email')
-                ->get()
+            'users' => $users
                 ->map(fn (User $user) => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'created_at' => optional($user->created_at)->format('d.m.Y H:i'),
+                    'is_current_user' => $currentUserId === $user->id,
+                    'can_delete' => $adminCount > 1 && $currentUserId !== $user->id,
                 ])
                 ->all(),
         ]);
@@ -36,23 +43,90 @@ class AdminUserController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['nullable', 'string', 'max:255'],
-            'email' => $this->emailRules(),
-            'password' => $this->passwordRules(),
-        ]);
-
-        $name = trim((string) ($validated['name'] ?? ''));
-        $email = Str::lower((string) $validated['email']);
+        $validated = $this->validateAdminUser($request);
+        $email = $this->normalizeEmail((string) $validated['email']);
 
         User::create([
-            'name' => $name !== '' ? $name : $this->resolveDisplayName($email),
+            'name' => $this->resolveName($validated['name'] ?? null, $email),
             'email' => $email,
             'password' => $validated['password'],
             'is_admin' => true,
         ]);
 
         return to_route('admin.users.index')->with('success', 'Administratorul a fost adăugat.');
+    }
+
+    public function update(Request $request, User $user): RedirectResponse
+    {
+        $admin = $this->resolveAdminUser($user);
+        $validated = $this->validateAdminUser($request, $admin->id, false);
+        $email = $this->normalizeEmail((string) $validated['email']);
+
+        $admin->forceFill([
+            'name' => $this->resolveName($validated['name'] ?? null, $email),
+            'email' => $email,
+        ]);
+
+        if (filled($validated['password'] ?? null)) {
+            $admin->password = $validated['password'];
+        }
+
+        $admin->save();
+
+        return to_route('admin.users.index')->with('success', 'Administratorul a fost actualizat.');
+    }
+
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        $admin = $this->resolveAdminUser($user);
+
+        if ($request->user()?->is($admin)) {
+            return to_route('admin.users.index')->with('error', 'Contul tău nu poate fi șters din această pagină.');
+        }
+
+        if (User::query()->where('is_admin', true)->count() <= 1) {
+            return to_route('admin.users.index')->with('error', 'Trebuie să rămână cel puțin un administrator activ.');
+        }
+
+        $admin->delete();
+
+        return to_route('admin.users.index')->with('success', 'Administratorul a fost șters.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateAdminUser(
+        Request $request,
+        ?int $userId = null,
+        bool $passwordRequired = true,
+    ): array {
+        return $request->validate([
+            'name' => ['nullable', 'string', 'max:255'],
+            'email' => $this->emailRules($userId),
+            'password' => $passwordRequired
+                ? $this->passwordRules()
+                : ['nullable', 'string', Password::default(), 'confirmed'],
+        ]);
+    }
+
+    private function resolveAdminUser(User $user): User
+    {
+        abort_unless($user->is_admin, 404);
+
+        return $user;
+    }
+
+    private function resolveName(?string $name, string $email): string
+    {
+        $resolvedName = trim((string) $name);
+
+        return $resolvedName !== '' ? $resolvedName : $this->resolveDisplayName($email);
+    }
+
+    private function normalizeEmail(string $email): string
+    {
+        return Str::lower($email);
     }
 
     private function resolveDisplayName(string $email): string
