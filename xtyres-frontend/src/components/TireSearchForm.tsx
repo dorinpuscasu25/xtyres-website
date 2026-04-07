@@ -45,11 +45,11 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
     [searchFilters]
   );
   const widthFilter = useMemo(
-    () => findAttribute(searchFilters, ['latime', 'shirina']),
+    () => findAttribute(searchFilters, ['latime', 'latime-mm', 'shirina']),
     [searchFilters]
   );
   const heightFilter = useMemo(
-    () => findAttribute(searchFilters, ['inaltime', 'vysota']),
+    () => findAttribute(searchFilters, ['inaltime', 'inaltime-%', 'vysota']),
     [searchFilters]
   );
   const seasonFilter = useMemo(
