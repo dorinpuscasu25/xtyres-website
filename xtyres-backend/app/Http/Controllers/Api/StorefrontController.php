@@ -627,19 +627,20 @@ class StorefrontController extends Controller
                 ->where('attribute_id', $attribute->id);
 
             $relatedCount = $relatedValues->count();
+            $effectiveType = $this->resolveAttributeFilterType($attribute, $relatedValues);
 
             $payload = [
                 'id' => $attribute->id,
                 'slug' => $this->localize($attribute->getTranslations('slug'), $locale),
                 'label' => $this->localize($attribute->getTranslations('name'), $locale),
-                'type' => $attribute->type,
+                'type' => $effectiveType,
                 '_meta' => [
                     'related_count' => $relatedCount,
                     'sort_order' => $attribute->sort_order,
                 ],
             ];
 
-            if (in_array($attribute->type, ['select', 'multi_select'], true)) {
+            if (in_array($effectiveType, ['select', 'multi_select'], true)) {
                 $optionCounts = $relatedValues
                     ->filter(fn (ProductAttributeValue $value) => $value->option)
                     ->groupBy('attribute_option_id')
@@ -656,7 +657,7 @@ class StorefrontController extends Controller
                     ->all();
             }
 
-            if ($attribute->type === 'number') {
+            if ($effectiveType === 'number') {
                 $numbers = $relatedValues
                     ->pluck('number_value')
                     ->filter(fn ($number) => ! is_null($number))
@@ -667,7 +668,7 @@ class StorefrontController extends Controller
                 $payload['values'] = $numbers->unique()->sort()->values()->all();
             }
 
-            if ($attribute->type === 'boolean') {
+            if ($effectiveType === 'boolean') {
                 $payload['options'] = [
                     ['id' => 1, 'label' => 'Da', 'value' => true, 'count' => $relatedValues->where('boolean_value', true)->count()],
                     ['id' => 0, 'label' => 'Nu', 'value' => false, 'count' => $relatedValues->where('boolean_value', false)->count()],
@@ -721,6 +722,18 @@ class StorefrontController extends Controller
             ],
             'attributes' => $attributes,
         ];
+    }
+
+    private function resolveAttributeFilterType(Attribute $attribute, Collection $relatedValues): string
+    {
+        $hasNumberValues = $relatedValues->contains(fn (ProductAttributeValue $value) => ! is_null($value->number_value));
+        $hasOptionValues = $relatedValues->contains(fn (ProductAttributeValue $value) => ! is_null($value->attribute_option_id));
+
+        if ($hasNumberValues && ! $hasOptionValues) {
+            return 'number';
+        }
+
+        return $attribute->type;
     }
 
     private function descendantIds(Category $category): array

@@ -43,13 +43,47 @@ class StorefrontCatalogFiltersTest extends TestCase
         $this->assertSame([225, 235, 245], $widthFilters->first()['values']);
     }
 
-    private function createFilterableAttribute(string $name, string $slug, int $sortOrder, Category $category): Attribute
+    public function test_catalog_filters_fall_back_to_number_when_attribute_type_is_misconfigured(): void
+    {
+        $category = Category::query()->create([
+            'name' => ['ro' => 'Anvelope', 'ru' => 'Шины'],
+            'slug' => ['ro' => 'anvelope', 'ru' => 'shiny'],
+            'description' => ['ro' => '', 'ru' => ''],
+            'is_active' => true,
+            'is_featured' => false,
+            'menu_order' => 0,
+        ]);
+
+        $width = $this->createFilterableAttribute('Lățime', 'latime', 1, $category, 'select');
+
+        $this->createProductWithNumberAttribute('SKU-1', $category, $width, 205);
+        $this->createProductWithNumberAttribute('SKU-2', $category, $width, 225);
+
+        $response = $this->getJson('/api/storefront/catalog?locale=ro&category=anvelope');
+
+        $response->assertOk();
+
+        $attributes = collect($response->json('filters.attributes'));
+        $widthFilter = $attributes->firstWhere('slug', 'latime');
+
+        $this->assertNotNull($widthFilter);
+        $this->assertSame('number', $widthFilter['type']);
+        $this->assertSame([205, 225], $widthFilter['values']);
+    }
+
+    private function createFilterableAttribute(
+        string $name,
+        string $slug,
+        int $sortOrder,
+        Category $category,
+        string $type = 'number',
+    ): Attribute
     {
         $attribute = Attribute::query()->create([
             'name' => ['ro' => $name, 'ru' => $name],
             'slug' => ['ro' => $slug, 'ru' => $slug],
             'description' => ['ro' => '', 'ru' => ''],
-            'type' => 'number',
+            'type' => $type,
             'is_filterable' => true,
             'is_required' => false,
             'is_active' => true,

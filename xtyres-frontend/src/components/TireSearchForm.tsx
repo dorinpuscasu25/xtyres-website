@@ -15,11 +15,31 @@ function flattenCategories(categories: StoreCategory[]): StoreCategory[] {
   return categories.flatMap((category) => [category, ...flattenCategories(category.children)]);
 }
 
+function normalizeAttributeText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
 function findAttribute(
   attributes: CatalogAttributeFilter[],
-  slugs: string[],
+  candidates: string[],
 ): CatalogAttributeFilter | undefined {
-  return attributes.find((attribute) => slugs.includes(attribute.slug));
+  const normalizedCandidates = candidates.map(normalizeAttributeText);
+
+  return attributes.find((attribute) => {
+    const searchableValues = [attribute.slug, attribute.label]
+      .filter(Boolean)
+      .map(normalizeAttributeText);
+
+    return searchableValues.some((searchableValue) =>
+      normalizedCandidates.some((candidate) =>
+        searchableValue === candidate || searchableValue.includes(candidate)
+      )
+    );
+  });
 }
 
 export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
@@ -45,15 +65,15 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
     [searchFilters]
   );
   const widthFilter = useMemo(
-    () => findAttribute(searchFilters, ['latime', 'latime-mm', 'shirina']),
+    () => findAttribute(searchFilters, ['latime', 'latime-mm', 'latimemm', 'shirina']),
     [searchFilters]
   );
   const heightFilter = useMemo(
-    () => findAttribute(searchFilters, ['inaltime', 'inaltime-%', 'vysota']),
+    () => findAttribute(searchFilters, ['inaltime', 'inaltime-%', 'inaltimeprocent', 'vysota']),
     [searchFilters]
   );
   const seasonFilter = useMemo(
-    () => findAttribute(searchFilters, ['sezon']),
+    () => findAttribute(searchFilters, ['sezon', 'season']),
     [searchFilters]
   );
 
