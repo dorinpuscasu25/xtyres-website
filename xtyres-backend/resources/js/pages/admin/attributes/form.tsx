@@ -37,6 +37,8 @@ type Props = {
     attribute: Omit<AttributeFormData, '_method'>;
     categoryTree: CategoryNode[];
     attributeTypes: Array<{ value: string; label: string }>;
+    supportsOptionsManagement: boolean;
+    optionsCount: number;
 };
 
 export default function AttributeForm({
@@ -44,6 +46,8 @@ export default function AttributeForm({
     attribute,
     categoryTree,
     attributeTypes,
+    supportsOptionsManagement,
+    optionsCount,
 }: Props) {
     const [activeLocale, setActiveLocale] = useState<'ro' | 'ru'>('ro');
     const breadcrumbs: BreadcrumbItem[] = [
@@ -64,6 +68,19 @@ export default function AttributeForm({
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
+
+        const willDisableOptions = !['select', 'multi_select'].includes(form.data.type);
+
+        if (
+            mode === 'edit' &&
+            supportsOptionsManagement &&
+            optionsCount > 0 &&
+            willDisableOptions &&
+            !window.confirm('Schimbarea tipului va șterge toate opțiunile existente ale atributului. Continui?')
+        ) {
+            return;
+        }
+
         const url = mode === 'create' ? '/admin/attributes' : `/admin/attributes/${attribute.id}`;
         form.post(url);
     };
@@ -89,7 +106,7 @@ export default function AttributeForm({
                     description="Definește tipul atributului și categoriile în care va fi disponibil."
                     actions={
                         <div className="flex gap-2">
-                            {mode === 'edit' && ['select', 'multi_select'].includes(form.data.type) ? (
+                            {mode === 'edit' && supportsOptionsManagement ? (
                                 <Button asChild variant="outline">
                                     <Link href={`/admin/attributes/${attribute.id}/options`}>
                                         Gestionează opțiuni
@@ -208,6 +225,16 @@ export default function AttributeForm({
                     {['select', 'multi_select'].includes(form.data.type) ? (
                         <div className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
                             Salvează atributul, apoi intră în pagina de opțiuni ca să adaugi valorile disponibile.
+                        </div>
+                    ) : null}
+
+                    {mode === 'edit' &&
+                    supportsOptionsManagement &&
+                    optionsCount > 0 &&
+                    !['select', 'multi_select'].includes(form.data.type) ? (
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                            Acest atribut are {optionsCount} opțiuni salvate. Dacă schimbi tipul și salvezi, ele vor fi
+                            șterse.
                         </div>
                     ) : null}
                 </Card>

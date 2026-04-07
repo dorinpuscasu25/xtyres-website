@@ -1,12 +1,13 @@
-import { FormEvent, useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import type { FormEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { FlashMessage } from '@/components/admin/flash-message';
 import { PageHeader } from '@/components/admin/page-header';
 import { Pagination } from '@/components/admin/pagination';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import AppLayout from '@/layouts/app-layout';
 import { localizedText } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
 
@@ -31,7 +32,7 @@ type Paginated<T> = {
 };
 
 type Props = {
-    filters: { search: string };
+    filters: { search: string; per_page: number };
     products: Paginated<ProductRow>;
 };
 
@@ -42,10 +43,67 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function ProductsIndex({ filters, products }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [perPage, setPerPage] = useState(String(filters.per_page ?? 250));
+    const [selectedProductIds, setSelectedProductIds] = useState<number[]>([]);
+    const [applyStock, setApplyStock] = useState(false);
+    const [stockQuantity, setStockQuantity] = useState('');
+    const [applyVisibility, setApplyVisibility] = useState(false);
+    const [catalogVisibility, setCatalogVisibility] = useState<'visible' | 'hidden'>('visible');
+
+    const currentPageProductIds = products.data.map((product) => product.id);
+    const currentPageProductIdsKey = currentPageProductIds.join(',');
+    const allSelectedOnPage =
+        currentPageProductIds.length > 0 &&
+        currentPageProductIds.every((productId) => selectedProductIds.includes(productId));
+
+    useEffect(() => {
+        setSelectedProductIds([]);
+    }, [currentPageProductIdsKey]);
 
     const submitSearch = (event: FormEvent) => {
         event.preventDefault();
-        router.get('/admin/products', { search }, { preserveState: true, replace: true });
+        router.get(
+            '/admin/products',
+            { search, per_page: Number(perPage) },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const toggleProduct = (productId: number) => {
+        setSelectedProductIds((current) =>
+            current.includes(productId) ? current.filter((id) => id !== productId) : [...current, productId],
+        );
+    };
+
+    const toggleSelectAll = () => {
+        if (allSelectedOnPage) {
+            setSelectedProductIds((current) => current.filter((id) => !currentPageProductIds.includes(id)));
+
+            return;
+        }
+
+        setSelectedProductIds((current) => [...new Set([...current, ...currentPageProductIds])]);
+    };
+
+    const submitBulkUpdate = (event: FormEvent) => {
+        event.preventDefault();
+
+        router.post(
+            '/admin/products/bulk-update',
+            {
+                product_ids: selectedProductIds,
+                apply_stock: applyStock,
+                stock_quantity: applyStock && stockQuantity !== '' ? Number(stockQuantity) : null,
+                apply_visibility: applyVisibility,
+                is_active: applyVisibility ? catalogVisibility === 'visible' : null,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSelectedProductIds([]);
+                },
+            },
+        );
     };
 
     return (
@@ -72,7 +130,91 @@ export default function ProductsIndex({ filters, products }: Props) {
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Caută după nume sau SKU"
                         />
+                        <select
+                            value={perPage}
+                            onChange={(event) => setPerPage(event.target.value)}
+                            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+                        >
+                            {[25, 50, 100, 250].map((option) => (
+                                <option key={option} value={option}>
+                                    {option} / pagină
+                                </option>
+                            ))}
+                        </select>
                         <Button type="submit">Caută</Button>
+                    </form>
+                </Card>
+
+                <Card className="p-4">
+                    <form onSubmit={submitBulkUpdate} className="space-y-4">
+                        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                            <div>
+                                <p className="font-medium">Editare în grup</p>
+                                <p className="text-sm text-muted-foreground">
+                                    Selectează produse din listă și aplică stocul sau vizibilitatea în catalog.
+                                </p>
+                            </div>
+                            <p className="text-sm font-medium">
+                                Selectate: {selectedProductIds.length}
+                            </p>
+                        </div>
+
+                        <div className="grid gap-4 lg:grid-cols-2">
+                            <div className="rounded-xl border border-border p-4">
+                                <label className="flex items-center gap-2 text-sm font-medium">
+                                    <input
+                                        type="checkbox"
+                                        checked={applyStock}
+                                        onChange={(event) => setApplyStock(event.target.checked)}
+                                    />
+                                    Actualizează stocul
+                                </label>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={stockQuantity}
+                                    onChange={(event) => setStockQuantity(event.target.value)}
+                                    placeholder="Cantitate nouă"
+                                    disabled={!applyStock}
+                                    className="mt-3"
+                                />
+                            </div>
+
+                            <div className="rounded-xl border border-border p-4">
+                                <label className="flex items-center gap-2 text-sm font-medium">
+                                    <input
+                                        type="checkbox"
+                                        checked={applyVisibility}
+                                        onChange={(event) => setApplyVisibility(event.target.checked)}
+                                    />
+                                    Actualizează vizibilitatea în catalog
+                                </label>
+                                <select
+                                    value={catalogVisibility}
+                                    onChange={(event) =>
+                                        setCatalogVisibility(event.target.value as 'visible' | 'hidden')
+                                    }
+                                    disabled={!applyVisibility}
+                                    className="mt-3 h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm"
+                                >
+                                    <option value="visible">Vizibil</option>
+                                    <option value="hidden">Ascuns</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end">
+                            <Button
+                                type="submit"
+                                disabled={
+                                    selectedProductIds.length === 0 ||
+                                    (!applyStock && !applyVisibility) ||
+                                    (applyStock && stockQuantity === '')
+                                }
+                            >
+                                Aplică modificările
+                            </Button>
+                        </div>
                     </form>
                 </Card>
 
@@ -81,6 +223,9 @@ export default function ProductsIndex({ filters, products }: Props) {
                         <table className="min-w-full text-sm">
                             <thead className="bg-muted/50">
                                 <tr>
+                                    <th className="px-6 py-3 text-left font-medium text-muted-foreground">
+                                        <input type="checkbox" checked={allSelectedOnPage} onChange={toggleSelectAll} />
+                                    </th>
                                     <th className="px-6 py-3 text-left font-medium text-muted-foreground">Produs</th>
                                     <th className="px-6 py-3 text-left font-medium text-muted-foreground">SKU</th>
                                     <th className="px-6 py-3 text-left font-medium text-muted-foreground">Brand</th>
@@ -94,6 +239,13 @@ export default function ProductsIndex({ filters, products }: Props) {
                             <tbody>
                                 {products.data.map((product) => (
                                     <tr key={product.id} className="border-t border-border">
+                                        <td className="px-6 py-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedProductIds.includes(product.id)}
+                                                onChange={() => toggleProduct(product.id)}
+                                            />
+                                        </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 {product.image_url ? (

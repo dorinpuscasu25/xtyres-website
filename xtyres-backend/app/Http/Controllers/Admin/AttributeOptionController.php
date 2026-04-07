@@ -17,7 +17,7 @@ class AttributeOptionController extends Controller
     {
         $search = $request->string('search')->toString();
 
-        $options = $attribute->options()->orderBy('sort_order')->orderBy('id');
+        $options = $attribute->options()->withCount('productValues')->orderBy('sort_order')->orderBy('id');
 
         if ($search !== '') {
             $this->applyTranslatableSearch($options, ['value'], $search);
@@ -33,7 +33,7 @@ class AttributeOptionController extends Controller
                 'value' => $option->getTranslations('value'),
                 'sort_order' => $option->sort_order,
                 'is_active' => $option->is_active,
-                'products_count' => $option->productValues()->count(),
+                'products_count' => $option->product_values_count,
             ]),
         ]);
     }

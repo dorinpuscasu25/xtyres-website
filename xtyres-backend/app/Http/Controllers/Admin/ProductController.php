@@ -23,6 +23,8 @@ class ProductController extends Controller
     public function index(Request $request): Response
     {
         $search = $request->string('search')->toString();
+        $perPage = (int) $request->integer('per_page', 250);
+        $perPage = in_array($perPage, [25, 50, 100, 250], true) ? $perPage : 250;
 
         $products = Product::query()
             ->with(['brand', 'primaryCategory', 'categories', 'images'])
@@ -38,8 +40,9 @@ class ProductController extends Controller
         return Inertia::render('admin/products/index', [
             'filters' => [
                 'search' => $search,
+                'per_page' => $perPage,
             ],
-            'products' => $products->paginate(10)->withQueryString()->through(fn (Product $product) => [
+            'products' => $products->paginate($perPage)->withQueryString()->through(fn (Product $product) => [
                 'id' => $product->id,
                 'name' => $product->getTranslations('name'),
                 'sku' => $product->sku,
@@ -54,6 +57,47 @@ class ProductController extends Controller
                 'is_featured' => $product->is_featured,
             ]),
         ]);
+    }
+
+    public function bulkUpdate(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'product_ids' => ['required', 'array', 'min:1'],
+            'product_ids.*' => ['integer', 'exists:products,id'],
+            'apply_stock' => ['required', 'boolean'],
+            'stock_quantity' => ['nullable', 'integer', 'min:0'],
+            'apply_visibility' => ['required', 'boolean'],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        $applyStock = (bool) $validated['apply_stock'];
+        $applyVisibility = (bool) $validated['apply_visibility'];
+
+        if (! $applyStock && ! $applyVisibility) {
+            return back()->with('error', 'Selectează cel puțin un câmp pentru editarea în grup.');
+        }
+
+        if ($applyStock && is_null($validated['stock_quantity'] ?? null)) {
+            return back()->with('error', 'Completează cantitatea de stoc pentru editarea în grup.');
+        }
+
+        $changes = [];
+
+        if ($applyStock) {
+            $changes['stock_quantity'] = (int) ($validated['stock_quantity'] ?? 0);
+        }
+
+        if ($applyVisibility) {
+            $changes['is_active'] = (bool) ($validated['is_active'] ?? false);
+        }
+
+        Product::query()
+            ->whereIn('id', $validated['product_ids'])
+            ->update($changes);
+
+        $count = count($validated['product_ids']);
+
+        return back()->with('success', "Au fost actualizate {$count} produse.");
     }
 
     public function create(): Response

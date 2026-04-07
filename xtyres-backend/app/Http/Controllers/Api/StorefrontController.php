@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -625,11 +626,17 @@ class StorefrontController extends Controller
                 ->flatMap(fn (Product $product) => $product->attributeValues)
                 ->where('attribute_id', $attribute->id);
 
+            $relatedCount = $relatedValues->count();
+
             $payload = [
                 'id' => $attribute->id,
                 'slug' => $this->localize($attribute->getTranslations('slug'), $locale),
                 'label' => $this->localize($attribute->getTranslations('name'), $locale),
                 'type' => $attribute->type,
+                '_meta' => [
+                    'related_count' => $relatedCount,
+                    'sort_order' => $attribute->sort_order,
+                ],
             ];
 
             if (in_array($attribute->type, ['select', 'multi_select'], true)) {
@@ -678,7 +685,33 @@ class StorefrontController extends Controller
             }
 
             return false;
-        })->values()->all();
+        })
+            ->groupBy('slug')
+            ->map(function (Collection $group) {
+                return $group
+                    ->sort(fn (array $left, array $right) => [
+                        $right['_meta']['related_count'],
+                        $right['_meta']['sort_order'],
+                        $right['id'],
+                    ] <=> [
+                        $left['_meta']['related_count'],
+                        $left['_meta']['sort_order'],
+                        $left['id'],
+                    ])
+                    ->first();
+            })
+            ->sort(fn (array $left, array $right) => [
+                $left['_meta']['sort_order'],
+                $left['label'],
+                $left['id'],
+            ] <=> [
+                $right['_meta']['sort_order'],
+                $right['label'],
+                $right['id'],
+            ])
+            ->map(fn (array $attribute) => Arr::except($attribute, ['_meta']))
+            ->values()
+            ->all();
 
         return [
             'brands' => $brands,

@@ -66,6 +66,8 @@ class AttributeController extends Controller
             ],
             'categoryTree' => $this->categoryTree(),
             'attributeTypes' => $this->attributeTypes(),
+            'supportsOptionsManagement' => false,
+            'optionsCount' => 0,
         ]);
     }
 
@@ -89,6 +91,8 @@ class AttributeController extends Controller
             ],
             'categoryTree' => $this->categoryTree(),
             'attributeTypes' => $this->attributeTypes(),
+            'supportsOptionsManagement' => in_array($attribute->type, ['select', 'multi_select'], true),
+            'optionsCount' => $attribute->options->count(),
         ]);
     }
 
