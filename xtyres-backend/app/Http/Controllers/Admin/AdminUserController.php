@@ -17,27 +17,41 @@ class AdminUserController extends Controller
 {
     use PasswordValidationRules, ProfileValidationRules;
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $search = trim((string) $request->query('search', ''));
+        $perPage = $this->resolvePerPage($request);
+
         $users = User::query()
             ->where('is_admin', true)
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($nested) use ($search): void {
+                    $nested
+                        ->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%');
+                });
+            })
             ->orderBy('name')
-            ->orderBy('email')
-            ->get();
-        $adminCount = $users->count();
+            ->orderBy('email');
+        $adminCount = User::query()->where('is_admin', true)->count();
         $currentUserId = auth()->id();
 
         return Inertia::render('admin/users/index', [
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage,
+            ],
             'users' => $users
-                ->map(fn (User $user) => [
+                ->paginate($perPage)
+                ->withQueryString()
+                ->through(fn (User $user) => [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'created_at' => optional($user->created_at)->format('d.m.Y H:i'),
                     'is_current_user' => $currentUserId === $user->id,
                     'can_delete' => $adminCount > 1 && $currentUserId !== $user->id,
-                ])
-                ->all(),
+                ]),
         ]);
     }
 

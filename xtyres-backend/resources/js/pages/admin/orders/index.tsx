@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { FlashMessage } from '@/components/admin/flash-message';
 import { PageHeader } from '@/components/admin/page-header';
 import { Pagination } from '@/components/admin/pagination';
+import { ADMIN_TABLE_PER_PAGE_OPTIONS, usePersistedPageSize } from '@/hooks/use-persisted-page-size';
 import type { BreadcrumbItem } from '@/types';
 
 type OrderRow = {
@@ -33,7 +34,7 @@ type Paginated<T> = {
 };
 
 type Props = {
-    filters: { search: string; status: string };
+    filters: { search: string; status: string; per_page: number };
     statuses: StatusOption[];
     orders: Paginated<OrderRow>;
 };
@@ -54,10 +55,16 @@ const statusStyles: Record<string, string> = {
 export default function OrdersIndex({ filters, statuses, orders }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [status, setStatus] = useState(filters.status ?? '');
+    const [perPage, setPerPage] = useState(String(filters.per_page ?? 25));
+
+    const applyPageSize = usePersistedPageSize('orders', filters.per_page ?? 25, (value) => {
+        setPerPage(String(value));
+        router.get('/admin/orders', { search, status, per_page: value }, { preserveState: true, preserveScroll: true, replace: true });
+    });
 
     const submitSearch = (event: FormEvent) => {
         event.preventDefault();
-        router.get('/admin/orders', { search, status }, { preserveState: true, replace: true });
+        router.get('/admin/orders', { search, status, per_page: Number(perPage) }, { preserveState: true, replace: true });
     };
 
     return (
@@ -73,7 +80,7 @@ export default function OrdersIndex({ filters, statuses, orders }: Props) {
                 />
 
                 <Card className="p-4">
-                    <form onSubmit={submitSearch} className="grid gap-3 md:grid-cols-[2fr_1fr_auto]">
+                    <form onSubmit={submitSearch} className="grid gap-3 md:grid-cols-[2fr_1fr_180px_auto]">
                         <Input
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
@@ -88,6 +95,20 @@ export default function OrdersIndex({ filters, statuses, orders }: Props) {
                             {statuses.map((option) => (
                                 <option key={option.value} value={option.value}>
                                     {option.label}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            value={perPage}
+                            onChange={(event) => {
+                                setPerPage(event.target.value);
+                                applyPageSize(Number(event.target.value));
+                            }}
+                            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+                        >
+                            {ADMIN_TABLE_PER_PAGE_OPTIONS.map((option) => (
+                                <option key={option} value={option}>
+                                    {option} / pagină
                                 </option>
                             ))}
                         </select>

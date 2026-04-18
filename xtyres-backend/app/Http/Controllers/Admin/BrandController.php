@@ -14,6 +14,7 @@ class BrandController extends Controller
     public function index(Request $request): Response
     {
         $search = $request->string('search')->toString();
+        $perPage = $this->resolvePerPage($request);
 
         $brands = Brand::query()
             ->orderBy('sort_order')
@@ -24,8 +25,9 @@ class BrandController extends Controller
         return Inertia::render('admin/brands/index', [
             'filters' => [
                 'search' => $search,
+                'per_page' => $perPage,
             ],
-            'brands' => $brands->paginate(10)->withQueryString()->through(fn (Brand $brand) => [
+            'brands' => $brands->paginate($perPage)->withQueryString()->through(fn (Brand $brand) => [
                 'id' => $brand->id,
                 'name' => $brand->getTranslations('name'),
                 'slug' => $brand->getTranslations('slug'),

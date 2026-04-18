@@ -16,6 +16,7 @@ class AttributeController extends Controller
     public function index(Request $request): Response
     {
         $search = $request->string('search')->toString();
+        $perPage = $this->resolvePerPage($request);
 
         $attributes = Attribute::query()
             ->with(['categories', 'options'])
@@ -27,8 +28,9 @@ class AttributeController extends Controller
         return Inertia::render('admin/attributes/index', [
             'filters' => [
                 'search' => $search,
+                'per_page' => $perPage,
             ],
-            'attributes' => $attributes->paginate(12)->withQueryString()->through(fn (Attribute $attribute) => [
+            'attributes' => $attributes->paginate($perPage)->withQueryString()->through(fn (Attribute $attribute) => [
                 'id' => $attribute->id,
                 'name' => $attribute->getTranslations('name'),
                 'slug' => $attribute->getTranslations('slug'),

@@ -16,6 +16,7 @@ class AttributeOptionController extends Controller
     public function index(Request $request, Attribute $attribute): Response
     {
         $search = $request->string('search')->toString();
+        $perPage = $this->resolvePerPage($request);
 
         $options = $attribute->options()->withCount('productValues')->orderBy('sort_order')->orderBy('id');
 
@@ -27,8 +28,9 @@ class AttributeOptionController extends Controller
             'attribute' => $this->attributePayload($attribute),
             'filters' => [
                 'search' => $search,
+                'per_page' => $perPage,
             ],
-            'options' => $options->paginate(12)->withQueryString()->through(fn (AttributeOption $option) => [
+            'options' => $options->paginate($perPage)->withQueryString()->through(fn (AttributeOption $option) => [
                 'id' => $option->id,
                 'value' => $option->getTranslations('value'),
                 'sort_order' => $option->sort_order,

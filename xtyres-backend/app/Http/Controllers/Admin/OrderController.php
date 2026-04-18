@@ -17,6 +17,7 @@ class OrderController extends Controller
     {
         $search = trim((string) $request->query('search', ''));
         $status = trim((string) $request->query('status', ''));
+        $perPage = $this->resolvePerPage($request);
 
         $orders = Order::query()
             ->withCount('items')
@@ -41,9 +42,10 @@ class OrderController extends Controller
             'filters' => [
                 'search' => $search,
                 'status' => $status,
+                'per_page' => $perPage,
             ],
             'statuses' => $this->statuses(),
-            'orders' => $orders->paginate(12)->withQueryString()->through(fn (Order $order) => [
+            'orders' => $orders->paginate($perPage)->withQueryString()->through(fn (Order $order) => [
                 'id' => $order->id,
                 'order_number' => $order->order_number,
                 'status' => $order->status,

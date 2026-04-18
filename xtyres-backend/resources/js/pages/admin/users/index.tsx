@@ -6,8 +6,10 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FlashMessage } from '@/components/admin/flash-message';
+import { Pagination } from '@/components/admin/pagination';
 import { PageHeader } from '@/components/admin/page-header';
 import InputError from '@/components/input-error';
+import { ADMIN_TABLE_PER_PAGE_OPTIONS, usePersistedPageSize } from '@/hooks/use-persisted-page-size';
 import type { BreadcrumbItem } from '@/types';
 
 type AdminUser = {
@@ -20,7 +22,11 @@ type AdminUser = {
 };
 
 type Props = {
-    users: AdminUser[];
+    filters: { search: string; per_page: number };
+    users: {
+        data: AdminUser[];
+        links: Array<{ url: string | null; label: string; active: boolean }>;
+    };
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -28,9 +34,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Administratori', href: '/admin/users' },
 ];
 
-export default function AdminUsersIndex({ users }: Props) {
+export default function AdminUsersIndex({ filters, users }: Props) {
     const [editingUserId, setEditingUserId] = useState<number | null>(null);
     const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
+    const [search, setSearch] = useState(filters.search ?? '');
+    const [perPage, setPerPage] = useState(String(filters.per_page ?? 25));
 
     const createForm = useForm({
         name: '',
@@ -47,9 +55,14 @@ export default function AdminUsersIndex({ users }: Props) {
     });
 
     const editingUser = useMemo(
-        () => users.find((user) => user.id === editingUserId) ?? null,
-        [editingUserId, users],
+        () => users.data.find((user) => user.id === editingUserId) ?? null,
+        [editingUserId, users.data],
     );
+
+    const applyPageSize = usePersistedPageSize('users', filters.per_page ?? 25, (value) => {
+        setPerPage(String(value));
+        router.get('/admin/users', { search, per_page: value }, { preserveState: true, preserveScroll: true, replace: true });
+    });
 
     const submitCreate = (event: FormEvent) => {
         event.preventDefault();
@@ -111,6 +124,11 @@ export default function AdminUsersIndex({ users }: Props) {
             },
             onFinish: () => setDeletingUserId(null),
         });
+    };
+
+    const submitSearch = (event: FormEvent) => {
+        event.preventDefault();
+        router.get('/admin/users', { search, per_page: Number(perPage) }, { preserveState: true, preserveScroll: true, replace: true });
     };
 
     return (
@@ -352,10 +370,44 @@ export default function AdminUsersIndex({ users }: Props) {
                     </div>
 
                     <Card className="overflow-hidden">
-                        <div className="border-b border-border px-6 py-4">
+                        <div className="space-y-4 border-b border-border px-6 py-4">
                             <h2 className="text-lg font-semibold">
                                 Lista administratorilor
                             </h2>
+                            <form
+                                onSubmit={submitSearch}
+                                className="flex flex-col gap-3 md:flex-row"
+                            >
+                                <Input
+                                    value={search}
+                                    onChange={(event) =>
+                                        setSearch(event.target.value)
+                                    }
+                                    placeholder="Caută după nume sau email"
+                                />
+                                <select
+                                    value={perPage}
+                                    onChange={(event) => {
+                                        setPerPage(event.target.value);
+                                        applyPageSize(
+                                            Number(event.target.value),
+                                        );
+                                    }}
+                                    className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+                                >
+                                    {ADMIN_TABLE_PER_PAGE_OPTIONS.map(
+                                        (option) => (
+                                            <option
+                                                key={option}
+                                                value={option}
+                                            >
+                                                {option} / pagină
+                                            </option>
+                                        ),
+                                    )}
+                                </select>
+                                <Button type="submit">Caută</Button>
+                            </form>
                         </div>
 
                         <div className="overflow-x-auto">
@@ -380,8 +432,8 @@ export default function AdminUsersIndex({ users }: Props) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {users.length > 0 ? (
-                                        users.map((user) => (
+                                    {users.data.length > 0 ? (
+                                        users.data.map((user) => (
                                             <tr
                                                 key={user.id}
                                                 className="border-t border-border"
@@ -461,6 +513,10 @@ export default function AdminUsersIndex({ users }: Props) {
                                     )}
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div className="border-t border-border px-6 py-4">
+                            <Pagination links={users.links} />
                         </div>
                     </Card>
                 </div>

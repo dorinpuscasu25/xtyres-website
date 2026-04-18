@@ -14,6 +14,7 @@ class CategoryController extends Controller
     public function index(Request $request): Response
     {
         $search = $request->string('search')->toString();
+        $perPage = $this->resolvePerPage($request);
 
         $categories = Category::query()
             ->with('parent')
@@ -25,8 +26,9 @@ class CategoryController extends Controller
         return Inertia::render('admin/categories/index', [
             'filters' => [
                 'search' => $search,
+                'per_page' => $perPage,
             ],
-            'categories' => $categories->paginate(12)->withQueryString()->through(fn (Category $category) => [
+            'categories' => $categories->paginate($perPage)->withQueryString()->through(fn (Category $category) => [
                 'id' => $category->id,
                 'name' => $category->getTranslations('name'),
                 'slug' => $category->getTranslations('slug'),

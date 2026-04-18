@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { FlashMessage } from '@/components/admin/flash-message';
 import { PageHeader } from '@/components/admin/page-header';
 import { Pagination } from '@/components/admin/pagination';
+import { ADMIN_TABLE_PER_PAGE_OPTIONS, usePersistedPageSize } from '@/hooks/use-persisted-page-size';
 import { localizedText } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
 
@@ -32,7 +33,7 @@ type Paginated<T> = {
 
 type Props = {
     attribute: AttributeInfo;
-    filters: { search: string };
+    filters: { search: string; per_page: number };
     options: Paginated<OptionRow>;
 };
 
@@ -42,6 +43,12 @@ export default function AttributeOptionsIndex({
     options,
 }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [perPage, setPerPage] = useState(String(filters.per_page ?? 25));
+
+    const applyPageSize = usePersistedPageSize(`attribute-options-${attribute.id}`, filters.per_page ?? 25, (value) => {
+        setPerPage(String(value));
+        router.get(`/admin/attributes/${attribute.id}/options`, { search, per_page: value }, { preserveState: true, preserveScroll: true, replace: true });
+    });
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Admin', href: '/admin' },
@@ -60,7 +67,7 @@ export default function AttributeOptionsIndex({
         event.preventDefault();
         router.get(
             `/admin/attributes/${attribute.id}/options`,
-            { search },
+            { search, per_page: Number(perPage) },
             { preserveState: true, replace: true },
         );
     };
@@ -98,6 +105,20 @@ export default function AttributeOptionsIndex({
                             onChange={(event) => setSearch(event.target.value)}
                             placeholder="Caută după valoare"
                         />
+                        <select
+                            value={perPage}
+                            onChange={(event) => {
+                                setPerPage(event.target.value);
+                                applyPageSize(Number(event.target.value));
+                            }}
+                            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+                        >
+                            {ADMIN_TABLE_PER_PAGE_OPTIONS.map((option) => (
+                                <option key={option} value={option}>
+                                    {option} / pagină
+                                </option>
+                            ))}
+                        </select>
                         <Button type="submit">Caută</Button>
                     </form>
                 </Card>

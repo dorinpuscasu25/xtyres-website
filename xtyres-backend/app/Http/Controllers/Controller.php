@@ -3,12 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 abstract class Controller
 {
+    protected function perPageOptions(): array
+    {
+        return [10, 25, 50, 100, 250];
+    }
+
+    protected function resolvePerPage(Request $request, int $default = 25): int
+    {
+        $perPage = (int) $request->integer('per_page', $default);
+
+        return in_array($perPage, $this->perPageOptions(), true)
+            ? $perPage
+            : $default;
+    }
+
     protected function supportedLocales(): array
     {
         return config('store.locales', ['ro', 'ru']);

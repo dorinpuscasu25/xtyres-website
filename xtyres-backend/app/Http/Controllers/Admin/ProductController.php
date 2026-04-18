@@ -23,8 +23,15 @@ class ProductController extends Controller
     public function index(Request $request): Response
     {
         $search = $request->string('search')->toString();
-        $perPage = (int) $request->integer('per_page', 250);
-        $perPage = in_array($perPage, [25, 50, 100, 250], true) ? $perPage : 250;
+        $perPage = $this->resolvePerPage($request, 250);
+        $sku = trim((string) $request->query('sku', ''));
+        $brandId = $request->filled('brand_id') ? $request->integer('brand_id') : null;
+        $categoryId = $request->filled('category_id') ? $request->integer('category_id') : null;
+        $status = trim((string) $request->query('status', ''));
+        $featured = trim((string) $request->query('featured', ''));
+        $stockStatus = trim((string) $request->query('stock_status', ''));
+        $priceMin = $request->filled('price_min') ? (float) $request->query('price_min') : null;
+        $priceMax = $request->filled('price_max') ? (float) $request->query('price_max') : null;
 
         $products = Product::query()
             ->with(['brand', 'primaryCategory', 'categories', 'images'])
@@ -37,10 +44,82 @@ class ProductController extends Controller
             });
         }
 
+        if ($sku !== '') {
+            $products->where('sku', 'like', '%'.$sku.'%');
+        }
+
+        if ($brandId) {
+            $products->where('brand_id', $brandId);
+        }
+
+        if ($categoryId) {
+            $products->where(function (Builder $query) use ($categoryId): void {
+                $query
+                    ->where('primary_category_id', $categoryId)
+                    ->orWhereHas('categories', fn (Builder $categoryQuery) => $categoryQuery->where('categories.id', $categoryId));
+            });
+        }
+
+        if ($status === 'active') {
+            $products->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $products->where('is_active', false);
+        }
+
+        if ($featured === 'featured') {
+            $products->where('is_featured', true);
+        } elseif ($featured === 'regular') {
+            $products->where('is_featured', false);
+        }
+
+        if ($stockStatus === 'in_stock') {
+            $products->where('stock_quantity', '>', 0);
+        } elseif ($stockStatus === 'out_of_stock') {
+            $products->where('stock_quantity', '=', 0);
+        } elseif ($stockStatus === 'low_stock') {
+            $products->whereBetween('stock_quantity', [1, 5]);
+        }
+
+        if (! is_null($priceMin)) {
+            $products->where('price', '>=', $priceMin);
+        }
+
+        if (! is_null($priceMax)) {
+            $products->where('price', '<=', $priceMax);
+        }
+
         return Inertia::render('admin/products/index', [
             'filters' => [
                 'search' => $search,
                 'per_page' => $perPage,
+                'sku' => $sku,
+                'brand_id' => $brandId,
+                'category_id' => $categoryId,
+                'status' => $status,
+                'featured' => $featured,
+                'stock_status' => $stockStatus,
+                'price_min' => $priceMin,
+                'price_max' => $priceMax,
+            ],
+            'filterOptions' => [
+                'brands' => Brand::query()
+                    ->orderBy('sort_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (Brand $brand) => [
+                        'id' => $brand->id,
+                        'name' => $brand->getTranslations('name'),
+                    ])
+                    ->all(),
+                'categories' => Category::query()
+                    ->orderBy('menu_order')
+                    ->orderBy('id')
+                    ->get()
+                    ->map(fn (Category $category) => [
+                        'id' => $category->id,
+                        'name' => $category->getTranslations('name'),
+                    ])
+                    ->all(),
             ],
             'products' => $products->paginate($perPage)->withQueryString()->through(fn (Product $product) => [
                 'id' => $product->id,
@@ -68,12 +147,15 @@ class ProductController extends Controller
             'stock_quantity' => ['nullable', 'integer', 'min:0'],
             'apply_visibility' => ['required', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
+            'apply_featured' => ['sometimes', 'boolean'],
+            'is_featured' => ['nullable', 'boolean'],
         ]);
 
         $applyStock = (bool) $validated['apply_stock'];
         $applyVisibility = (bool) $validated['apply_visibility'];
+        $applyFeatured = (bool) ($validated['apply_featured'] ?? false);
 
-        if (! $applyStock && ! $applyVisibility) {
+        if (! $applyStock && ! $applyVisibility && ! $applyFeatured) {
             return back()->with('error', 'Selectează cel puțin un câmp pentru editarea în grup.');
         }
 
@@ -89,6 +171,10 @@ class ProductController extends Controller
 
         if ($applyVisibility) {
             $changes['is_active'] = (bool) ($validated['is_active'] ?? false);
+        }
+
+        if ($applyFeatured) {
+            $changes['is_featured'] = (bool) ($validated['is_featured'] ?? false);
         }
 
         Product::query()
