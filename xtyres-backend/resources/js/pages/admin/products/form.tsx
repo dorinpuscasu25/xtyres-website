@@ -378,7 +378,7 @@ export default function ProductForm({ mode, product, brands, categoryTree, attri
                 {activeTab === 'data' ? (
                     <>
                         <Card className="p-4">
-                            <TranslationLocaleTabs value={activeLocale} onChange={setActiveLocale} />
+                            <TranslationLocaleTabs value={activeLocale} onChange={setActiveLocale} errors={errors} />
                         </Card>
 
                         <Card className="space-y-6 p-6">
@@ -710,7 +710,7 @@ export default function ProductForm({ mode, product, brands, categoryTree, attri
                 ) : (
                     <>
                         <Card className="p-4">
-                            <TranslationLocaleTabs value={activeSeoLocale} onChange={setActiveSeoLocale} />
+                            <TranslationLocaleTabs value={activeSeoLocale} onChange={setActiveSeoLocale} errors={errors} />
                         </Card>
 
                         <Card className="space-y-6 p-6">

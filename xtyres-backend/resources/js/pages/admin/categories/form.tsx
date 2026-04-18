@@ -91,7 +91,7 @@ export default function CategoryForm({ mode, category, categoryTree }: Props) {
                 />
 
                 <Card className="p-4">
-                    <TranslationLocaleTabs value={activeLocale} onChange={setActiveLocale} />
+                    <TranslationLocaleTabs value={activeLocale} onChange={setActiveLocale} errors={errors} />
                 </Card>
 
                 <Card className="space-y-6 p-6">
