@@ -1,0 +1,51 @@
+# Legacy WordPress/WooCommerce redirects for xtyres.md.
+#
+# Use this file only on Apache hosting. Put these rules before the SPA/Laravel
+# fallback rule that sends all unknown requests to index.php or index.html.
+
+RewriteEngine On
+
+# Static page aliases.
+RewriteRule ^contact/?$ /contacts [R=301,L]
+RewriteRule ^contacts/$ /contacts [R=301,L]
+RewriteRule ^despre/$ /despre [R=301,L]
+RewriteRule ^livrare/$ /livrare [R=301,L]
+
+# WooCommerce shop.
+RewriteCond %{QUERY_STRING} (^|&)filter_season=vara(&|$)
+RewriteRule ^shop(?:/page/[0-9]+)?/?$ /products?category=anvelope&season=vara [R=301,L]
+
+RewriteCond %{QUERY_STRING} (^|&)filter_season=iarna(&|$)
+RewriteRule ^shop(?:/page/[0-9]+)?/?$ /products?category=anvelope&season=iarna [R=301,L]
+
+RewriteCond %{QUERY_STRING} (^|&)filter_season=all-season(&|$)
+RewriteRule ^shop(?:/page/[0-9]+)?/?$ /products?category=anvelope&season=all-season [R=301,L]
+
+RewriteRule ^shop(?:/page/[0-9]+)?/?$ /products?category=anvelope [R=301,L]
+
+# Product URLs already match the new route. Normalize trailing slash.
+RewriteRule ^produs/([^/]+)/$ /produs/$1 [R=301,L]
+
+# Main product categories.
+RewriteRule ^product-category/anvelope(?:/page/[0-9]+)?/?$ /products?category=anvelope [R=301,L]
+RewriteRule ^product-category/acumulatoare(?:/page/[0-9]+)?/?$ /products?category=acumulatoare [R=301,L]
+
+# Nested brand archives.
+RewriteRule ^product-category/anvelope/([^/]+)(?:/page/[0-9]+)?/?$ /products?category=anvelope&brand=$1 [R=301,L]
+RewriteRule ^product-category/acumulatoare/([^/]+)(?:/page/[0-9]+)?/?$ /products?category=acumulatoare&brand=$1 [R=301,L]
+
+# Direct tire brand archives.
+RewriteRule ^product-category/(hankook|pirelli|maxxis|matador|continental|michelin|uniroyal|viking|nokian|arivo|roadx|sailun|bridgestone|kumho|tracmax|yokohama|firestone|nexen|riken|platin|tourador|goodyear|dunlop|debica|barum|gislaved|laufenn|tigar|kormoran|linglong|triangle|westlake|zeetex|lassa|petlas|kapsen|goodride|aptany|mirage|ovation|powertrac|sunfull|windforce|grenlander|nankang|wanli|minerva|imperial|austone|fortune|landsail|doublestar|fronway|lanvigator|royal-black|annaite|compasal|toyo|falken|fulda|semperit|general-tire|bfgoodrich)(?:/page/[0-9]+)?/?$ /products?category=anvelope&brand=$1 [R=301,L]
+
+# Direct battery brand archives.
+RewriteRule ^product-category/(bosch|varta|energizer|exide|mutlu|forse|autopart|rocket|tab|topla|banner|rombat|black-horse|monbat|yuasa|akom|ista|west-volt)(?:/page/[0-9]+)?/?$ /products?category=acumulatoare&brand=$1 [R=301,L]
+
+# Unknown one-level WooCommerce category.
+RewriteRule ^product-category/([^/]+)(?:/page/[0-9]+)?/?$ /products?category=$1 [R=301,L]
+
+# WooCommerce utility pages.
+RewriteRule ^(cart|checkout|my-account|wishlist|compare)/?$ /products?category=anvelope [R=301,L]
+
+# WordPress internals and feeds.
+RewriteRule ^(wp-content|wp-includes|wp-admin|wp-json|xmlrpc\.php) / [R=301,L]
+RewriteRule ^(feed|comments/feed)/?$ / [R=301,L]
