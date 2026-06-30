@@ -21,10 +21,14 @@ const TikTokIcon = ({ className }: {className?: string;}) =>
   
     <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
   </svg>;
+
+const DEFAULT_FOOTER_LOGO = '/assets/logos/xtyres-logo-yellow.svg';
+
 export function Footer() {
   const { t } = useTranslation();
   const { bootstrap } = useStorefront();
   const settings = bootstrap?.settings;
+  const footerLogoUrl = settings?.footerLogoUrl || DEFAULT_FOOTER_LOGO;
   const menu = bootstrap?.menu ?? [];
   const socialMap = {
     facebook: FacebookIcon,
@@ -38,10 +42,12 @@ export function Footer() {
           <div>
             <a
               href="#"
-              className="text-2xl font-heading font-extrabold tracking-tight text-white flex items-baseline mb-6">
+              className="inline-flex items-center mb-6">
               
-              {settings?.siteName || 'XTyres'}
-              <span className="text-amber-500 text-3xl leading-none">.</span>md
+              <img
+                src={footerLogoUrl}
+                alt={settings?.siteName || 'XTyres.md'}
+                className="h-12 w-auto object-contain" />
             </a>
             <p className="text-slate-400 leading-relaxed mb-6">
               {settings?.footerText ||

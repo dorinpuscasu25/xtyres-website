@@ -170,20 +170,6 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
     <section className="w-full px-4 relative z-20 -mt-16 mb-20">
       <div className="max-w-5xl mx-auto">
         <motion.div
-          initial={{
-            opacity: 0,
-            y: 20
-          }}
-          whileInView={{
-            opacity: 1,
-            y: 0
-          }}
-          viewport={{
-            once: true
-          }}
-          transition={{
-            duration: 0.5
-          }}
           className="bg-white rounded-xl shadow-2xl p-6 md:p-8 border border-slate-100">
           
           <h2 className="text-xl font-heading font-bold text-slate-900 mb-6 uppercase tracking-wide flex items-center">

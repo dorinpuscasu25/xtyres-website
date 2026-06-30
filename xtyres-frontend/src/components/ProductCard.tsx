@@ -12,8 +12,7 @@ interface ProductCardProps {
 }
 export function ProductCard({
   product,
-  onNavigate,
-  index = 0
+  onNavigate
 }: ProductCardProps) {
   const { t } = useTranslation();
   const { addToCart } = useCart();
@@ -55,21 +54,6 @@ export function ProductCard({
   };
   return (
     <motion.div
-      initial={{
-        opacity: 0,
-        y: 20
-      }}
-      whileInView={{
-        opacity: 1,
-        y: 0
-      }}
-      viewport={{
-        once: true
-      }}
-      transition={{
-        duration: 0.5,
-        delay: index * 0.1
-      }}
       className="bg-white border border-slate-100 rounded-xl p-3 sm:p-6 shadow-sm hover:shadow-xl transition-shadow duration-300 flex flex-col relative group cursor-pointer"
       onClick={() =>
         onNavigate('product-detail', {

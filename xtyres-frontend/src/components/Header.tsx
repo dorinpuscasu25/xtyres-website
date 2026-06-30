@@ -33,12 +33,16 @@ const TikTokIcon = ({ className }: {className?: string;}) =>
 interface HeaderProps {
   onNavigate: NavigateFn;
 }
+
+const DEFAULT_HEADER_LOGO = '/assets/logos/xtyres-logo-black.svg';
+
 export function Header({ onNavigate }: HeaderProps) {
   const { t } = useTranslation();
   const { totalItems } = useCart();
   const { bootstrap } = useStorefront();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const settings = bootstrap?.settings;
+  const headerLogoUrl = settings?.headerLogoUrl || DEFAULT_HEADER_LOGO;
   const menu = bootstrap?.menu ?? [];
   const socialMap = {
     facebook: FacebookIcon,
@@ -102,16 +106,10 @@ export function Header({ onNavigate }: HeaderProps) {
             className="flex items-center cursor-pointer"
             onClick={() => handleNav('home')}>
             
-            {settings?.headerLogoUrl ?
             <img
-              src={settings.headerLogoUrl}
-              alt={settings.siteName}
-              className="h-10 w-auto object-contain" /> :
-            <span className="text-2xl font-heading font-extrabold tracking-tight text-slate-900 flex items-baseline">
-                {settings?.siteName || 'XTyres'}
-                <span className="text-amber-500 text-3xl leading-none">.</span>md
-              </span>
-            }
+              src={headerLogoUrl}
+              alt={settings?.siteName || 'XTyres.md'}
+              className="h-10 w-auto object-contain" />
           </div>
 
           <nav className="hidden lg:flex items-center space-x-8">
@@ -212,9 +210,10 @@ export function Header({ onNavigate }: HeaderProps) {
       <div className="fixed inset-0 bg-black/50 z-50 lg:hidden">
           <div className="fixed top-0 right-0 h-full w-80 max-w-[90vw] bg-white shadow-2xl flex flex-col">
             <div className="flex items-center justify-between p-4 border-b border-slate-100">
-              <span className="text-xl font-bold text-slate-900">
-                {settings?.siteName || 'XTyres'}
-              </span>
+              <img
+                src={headerLogoUrl}
+                alt={settings?.siteName || 'XTyres.md'}
+                className="h-9 w-auto object-contain" />
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-slate-500 hover:text-slate-900 p-2">

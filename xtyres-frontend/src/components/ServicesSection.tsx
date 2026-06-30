@@ -41,21 +41,6 @@ export function ServicesSection() {
           {services.map((service, index) =>
           <motion.div
             key={index}
-            initial={{
-              opacity: 0,
-              y: 30
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              duration: 0.5,
-              delay: index * 0.2
-            }}
             className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-4 sm:p-8 text-center hover:bg-slate-800 transition-colors duration-300">
             
               <div className="w-12 h-12 sm:w-20 sm:h-20 mx-auto bg-amber-500 rounded-full flex items-center justify-center mb-4 sm:mb-6 shadow-lg shadow-amber-500/20">

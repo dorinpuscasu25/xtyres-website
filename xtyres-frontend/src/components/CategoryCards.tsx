@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import {
   ArrowRightIcon,
   SunIcon,
@@ -31,31 +30,6 @@ export function CategoryCards({
     'bg-gradient-to-br from-slate-900 to-slate-950'
   }));
 
-  const containerVariants = {
-    hidden: {
-      opacity: 0
-    },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2
-      }
-    }
-  };
-  const itemVariants = {
-    hidden: {
-      opacity: 0,
-      y: 30
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: 'easeOut'
-      }
-    }
-  };
   return (
     <section className="py-20 px-4 bg-slate-50">
       <div className="max-w-7xl mx-auto">
@@ -66,21 +40,12 @@ export function CategoryCards({
           <div className="w-24 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
         </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{
-            once: true,
-            margin: '-100px'
-          }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {mappedCategories.map((cat, index) =>
-          <motion.a
+          <a
             key={index}
             href="#catalog"
-            variants={itemVariants}
             onClick={(event) => {
               event.preventDefault();
               onNavigate('products', {
@@ -101,9 +66,9 @@ export function CategoryCards({
                   {t('btn.view_products')} <ArrowRightIcon className="w-4 h-4 ml-2" />
                 </div>
               </div>
-            </motion.a>
+            </a>
           )}
-        </motion.div>
+        </div>
 
         {mappedCategories.length === 0 ?
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center text-slate-500">

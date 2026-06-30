@@ -37,21 +37,6 @@ export function WhyChooseUs() {
           {features.map((feature, index) =>
           <motion.div
             key={index}
-            initial={{
-              opacity: 0,
-              y: 20
-            }}
-            whileInView={{
-              opacity: 1,
-              y: 0
-            }}
-            viewport={{
-              once: true
-            }}
-            transition={{
-              duration: 0.5,
-              delay: index * 0.1
-            }}
             className="flex flex-col items-center text-center group">
             
               <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 group-hover:bg-amber-50 transition-colors duration-300">
