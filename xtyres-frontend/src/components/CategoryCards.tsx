@@ -7,6 +7,7 @@ import {
 'lucide-react';
 import { StoreCategory } from '../lib/products';
 import { NavigateFn } from '../lib/navigation';
+import { useTranslation } from '../lib/i18n';
 interface CategoryCardsProps {
   categories: StoreCategory[];
   onNavigate: NavigateFn;
@@ -15,6 +16,7 @@ export function CategoryCards({
   categories,
   onNavigate
 }: CategoryCardsProps) {
+  const { t } = useTranslation();
   const mappedCategories = categories.slice(0, 3).map((category, index) => ({
     ...category,
     icon: index === 0 ?
@@ -59,7 +61,7 @@ export function CategoryCards({
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 uppercase tracking-wide">
-            Categorii Produse
+            {t('section.categories')}
           </h2>
           <div className="w-24 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
         </div>
@@ -96,7 +98,7 @@ export function CategoryCards({
                   {cat.name}
                 </h3>
                 <div className="flex items-center text-amber-500 font-semibold uppercase tracking-widest text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  Vezi Produse <ArrowRightIcon className="w-4 h-4 ml-2" />
+                  {t('btn.view_products')} <ArrowRightIcon className="w-4 h-4 ml-2" />
                 </div>
               </div>
             </motion.a>
@@ -105,7 +107,7 @@ export function CategoryCards({
 
         {mappedCategories.length === 0 ?
         <div className="rounded-2xl border border-slate-200 bg-white px-6 py-10 text-center text-slate-500">
-            Categoriile evidențiate vor apărea aici după configurarea lor din admin.
+            {t('section.categories_empty')}
           </div> :
         null}
       </div>

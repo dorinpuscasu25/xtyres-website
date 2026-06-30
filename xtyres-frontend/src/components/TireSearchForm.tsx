@@ -20,7 +20,7 @@ function normalizeAttributeText(value: string): string {
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '');
+    .replace(/[^\p{L}\p{N}]+/gu, '');
 }
 
 function findAttribute(
@@ -42,8 +42,59 @@ function findAttribute(
   });
 }
 
+function getFilterOptions(filter?: CatalogAttributeFilter) {
+  if (!filter) return [];
+
+  if (filter.options && filter.options.length > 0) {
+    return filter.options.map((option) => ({
+      value: String(option.id),
+      label: option.label,
+    }));
+  }
+
+  return (filter.values || []).map((value) => ({
+    value: String(value),
+    label: String(value),
+  }));
+}
+
+function addQuickFilter(
+  filters: CatalogRequestFilter[],
+  filter: CatalogAttributeFilter | undefined,
+  selectedValue: string,
+) {
+  if (!filter || !selectedValue) return;
+
+  if (filter.type === 'select' || filter.type === 'multi_select') {
+    filters.push({
+      attribute_id: filter.id,
+      type: filter.type,
+      values: [Number(selectedValue)]
+    });
+
+    return;
+  }
+
+  if (filter.type === 'boolean') {
+    filters.push({
+      attribute_id: filter.id,
+      type: 'boolean',
+      value: selectedValue === '1'
+    });
+
+    return;
+  }
+
+  filters.push({
+    attribute_id: filter.id,
+    type: 'number',
+    min: Number(selectedValue),
+    max: Number(selectedValue)
+  });
+}
+
 export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
-  const { locale } = useTranslation();
+  const { t, locale } = useTranslation();
   const { bootstrap } = useStorefront();
   const [searchFilters, setSearchFilters] = useState<CatalogAttributeFilter[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,21 +112,26 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
   }, [bootstrap]);
 
   const diameterFilter = useMemo(
-    () => findAttribute(searchFilters, ['diametru', 'diametr']),
+    () => findAttribute(searchFilters, ['diametru', 'diametr', 'diameter', 'диаметр']),
     [searchFilters]
   );
   const widthFilter = useMemo(
-    () => findAttribute(searchFilters, ['latime', 'latime-mm', 'latimemm', 'shirina']),
+    () => findAttribute(searchFilters, ['latime', 'latime-mm', 'latimemm', 'width', 'shirina', 'ширина']),
     [searchFilters]
   );
   const heightFilter = useMemo(
-    () => findAttribute(searchFilters, ['inaltime', 'inaltime-%', 'inaltimeprocent', 'vysota']),
+    () => findAttribute(searchFilters, ['inaltime', 'inaltime-%', 'inaltimeprocent', 'height', 'vysota', 'высота']),
     [searchFilters]
   );
   const seasonFilter = useMemo(
-    () => findAttribute(searchFilters, ['sezon', 'season']),
+    () => findAttribute(searchFilters, ['sezon', 'season', 'sezonul', 'сезон']),
     [searchFilters]
   );
+
+  const diameterOptions = useMemo(() => getFilterOptions(diameterFilter), [diameterFilter]);
+  const widthOptions = useMemo(() => getFilterOptions(widthFilter), [widthFilter]);
+  const heightOptions = useMemo(() => getFilterOptions(heightFilter), [heightFilter]);
+  const seasonOptions = useMemo(() => getFilterOptions(seasonFilter), [seasonFilter]);
 
   useEffect(() => {
     if (!tireCategory?.slug) return;
@@ -99,39 +155,10 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
   const submit = () => {
     const filters: CatalogRequestFilter[] = [];
 
-    if (diameterFilter && diameter) {
-      filters.push({
-        attribute_id: diameterFilter.id,
-        type: 'select',
-        values: [Number(diameter)]
-      });
-    }
-
-    if (seasonFilter && season) {
-      filters.push({
-        attribute_id: seasonFilter.id,
-        type: 'select',
-        values: [Number(season)]
-      });
-    }
-
-    if (widthFilter && width) {
-      filters.push({
-        attribute_id: widthFilter.id,
-        type: 'number',
-        min: Number(width),
-        max: Number(width)
-      });
-    }
-
-    if (heightFilter && height) {
-      filters.push({
-        attribute_id: heightFilter.id,
-        type: 'number',
-        min: Number(height),
-        max: Number(height)
-      });
-    }
+    addQuickFilter(filters, diameterFilter, diameter);
+    addQuickFilter(filters, widthFilter, width);
+    addQuickFilter(filters, heightFilter, height);
+    addQuickFilter(filters, seasonFilter, season);
 
     onNavigate('products', {
       categorySlug: tireCategory?.slug,
@@ -161,7 +188,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
           
           <h2 className="text-xl font-heading font-bold text-slate-900 mb-6 uppercase tracking-wide flex items-center">
             <span className="w-2 h-6 bg-amber-500 mr-3 rounded-sm"></span>
-            Căutare Rapidă
+            {t('quick_search.title')}
           </h2>
 
           <div className="flex flex-col md:flex-row gap-4 items-end">
@@ -172,7 +199,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                   <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mr-2 text-[10px]">
                     1
                   </span>
-                  Diametru
+                  {t('quick_search.diameter')}
                 </label>
                 <div className="relative">
                   <select
@@ -180,9 +207,9 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     onChange={(event) => setDiameter(event.target.value)}
                     disabled={isLoading || !diameterFilter}
                     className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
-                    <option value="">Alege diametru</option>
-                    {(diameterFilter?.options || []).map((option) =>
-                    <option key={option.id} value={option.id}>
+                    <option value="">{t('quick_search.choose_diameter')}</option>
+                    {diameterOptions.map((option) =>
+                    <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     )}
@@ -197,7 +224,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                   <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mr-2 text-[10px]">
                     2
                   </span>
-                  Lățime
+                  {t('quick_search.width')}
                 </label>
                 <div className="relative">
                   <select
@@ -205,10 +232,10 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     onChange={(event) => setWidth(event.target.value)}
                     disabled={isLoading || !widthFilter}
                     className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
-                    <option value="">Alege lățime</option>
-                    {(widthFilter?.values || []).map((value) =>
-                    <option key={value} value={value}>
-                        {value}
+                    <option value="">{t('quick_search.choose_width')}</option>
+                    {widthOptions.map((option) =>
+                    <option key={option.value} value={option.value}>
+                        {option.label}
                       </option>
                     )}
                   </select>
@@ -222,7 +249,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                   <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mr-2 text-[10px]">
                     3
                   </span>
-                  Înălțime
+                  {t('quick_search.height')}
                 </label>
                 <div className="relative">
                   <select
@@ -230,10 +257,10 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     onChange={(event) => setHeight(event.target.value)}
                     disabled={isLoading || !heightFilter}
                     className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
-                    <option value="">Alege înălțime</option>
-                    {(heightFilter?.values || []).map((value) =>
-                    <option key={value} value={value}>
-                        {value}
+                    <option value="">{t('quick_search.choose_height')}</option>
+                    {heightOptions.map((option) =>
+                    <option key={option.value} value={option.value}>
+                        {option.label}
                       </option>
                     )}
                   </select>
@@ -247,7 +274,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                   <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mr-2 text-[10px]">
                     4
                   </span>
-                  Sezon
+                  {t('quick_search.season')}
                 </label>
                 <div className="relative">
                   <select
@@ -255,9 +282,9 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     onChange={(event) => setSeason(event.target.value)}
                     disabled={isLoading || !seasonFilter}
                     className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
-                    <option value="">Alege sezon</option>
-                    {(seasonFilter?.options || []).map((option) =>
-                    <option key={option.id} value={option.id}>
+                    <option value="">{t('quick_search.choose_season')}</option>
+                    {seasonOptions.map((option) =>
+                    <option key={option.value} value={option.value}>
                         {option.label}
                       </option>
                     )}
@@ -277,7 +304,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
               onClick={submit}
               className="w-full md:w-auto px-8 py-3 h-[50px] bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm whitespace-nowrap">
               
-              {isLoading ? 'Se încarcă...' : 'Căutare'}
+              {isLoading ? t('btn.loading') : t('btn.search')}
             </motion.button>
           </div>
         </motion.div>

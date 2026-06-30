@@ -33,14 +33,14 @@ export function HomePage({ onNavigate }: HomePageProps) {
   }, [locale]);
   return (
     <main className="flex-grow">
-      <HeroSection />
+      <HeroSection onNavigate={onNavigate} />
       <TireSearchForm onNavigate={onNavigate} />
       <CategoryCards categories={featuredCategories} onNavigate={onNavigate} />
       <FeaturedProducts products={featuredProducts} onNavigate={onNavigate} />
       <ServicesSection />
       <BrandsCarousel brands={brands} />
       <WhyChooseUs />
-      <ContactBanner />
+      <ContactBanner onNavigate={onNavigate} />
     </main>);
 
 }

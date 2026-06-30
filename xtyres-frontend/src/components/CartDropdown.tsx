@@ -1,10 +1,12 @@
 import { ShoppingBagIcon, XIcon, CircleDashedIcon } from 'lucide-react';
 import { useCart } from '../lib/cart';
 import { NavigateFn } from '../lib/navigation';
+import { useTranslation } from '../lib/i18n';
 interface CartDropdownProps {
   onNavigate: NavigateFn;
 }
 export function CartDropdown({ onNavigate }: CartDropdownProps) {
+  const { t } = useTranslation();
   const { items, removeFromCart, totalPrice } = useCart();
   if (items.length === 0) {
     return (
@@ -13,7 +15,7 @@ export function CartDropdown({ onNavigate }: CartDropdownProps) {
           <ShoppingBagIcon className="w-8 h-8 text-slate-300" />
         </div>
         <p className="text-slate-500 font-medium text-center mb-6">
-          Coșul tău este gol
+          {t('cart.empty')}
         </p>
         <button
           onClick={(e) => {
@@ -22,7 +24,7 @@ export function CartDropdown({ onNavigate }: CartDropdownProps) {
           }}
           className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-xs">
           
-          Continuă cumpărăturile
+          {t('btn.continue_shopping')}
         </button>
       </div>);
 
@@ -31,10 +33,10 @@ export function CartDropdown({ onNavigate }: CartDropdownProps) {
     <div className="absolute top-full right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 overflow-hidden flex flex-col max-h-[80vh]">
       <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
         <span className="font-heading font-bold text-slate-900 uppercase tracking-wider text-sm">
-          Coșul tău
+          {t('cart.title')}
         </span>
         <span className="text-xs font-bold text-slate-500">
-          {items.length} produse
+          {t('cart.products_count', { count: items.length })}
         </span>
       </div>
 
@@ -71,7 +73,7 @@ export function CartDropdown({ onNavigate }: CartDropdownProps) {
         )}
         {items.length > 3 &&
         <div className="text-center py-2 text-xs font-bold text-slate-400">
-            + încă {items.length - 3} produse
+            {t('cart.more_products', { count: items.length - 3 })}
           </div>
         }
       </div>
@@ -79,7 +81,7 @@ export function CartDropdown({ onNavigate }: CartDropdownProps) {
       <div className="p-4 border-t border-slate-100 bg-white">
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-            Total:
+            {t('cart.total')}
           </span>
           <span className="text-xl font-heading font-black text-slate-900">
             {totalPrice} MDL
@@ -93,7 +95,7 @@ export function CartDropdown({ onNavigate }: CartDropdownProps) {
             }}
             className="py-3 border-2 border-slate-200 hover:border-slate-900 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-xs text-center">
             
-            Vezi Coșul
+            {t('btn.view_cart')}
           </button>
           <button
             onClick={(e) => {

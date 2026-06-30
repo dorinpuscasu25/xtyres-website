@@ -355,11 +355,11 @@ export function ProductsPage({
                 }}
                 className="bg-transparent text-sm font-bold text-slate-900 focus:outline-none appearance-none pr-6 cursor-pointer"
               >
-                <option value="featured">Recomandate</option>
-                <option value="price_asc">Preț: mic la mare</option>
-                <option value="price_desc">Preț: mare la mic</option>
-                <option value="newest">Cele mai noi</option>
-                <option value="name_asc">Nume A-Z</option>
+                <option value="featured">{t('sort.featured')}</option>
+                <option value="price_asc">{t('sort.price_asc')}</option>
+                <option value="price_desc">{t('sort.price_desc')}</option>
+                <option value="newest">{t('sort.newest')}</option>
+                <option value="name_asc">{t('sort.name_asc')}</option>
               </select>
               <ChevronDownIcon className="w-4 h-4 text-slate-400 absolute right-3 pointer-events-none" />
             </div>
@@ -388,7 +388,7 @@ export function ProductsPage({
           <div className="flex-grow">
             {isLoading ? (
               <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500">
-                Se încarcă produsele...
+                {t('page.products.loading')}
               </div>
             ) : products.length > 0 ? (
               <>
@@ -417,7 +417,10 @@ export function ProductsPage({
                     &lt;
                   </button>
                   <span className="text-sm font-semibold text-slate-700">
-                    Pagina {pagination.currentPage} din {pagination.lastPage}
+                    {t('page.products.pagination', {
+                      current: pagination.currentPage,
+                      total: pagination.lastPage,
+                    })}
                   </span>
                   <button
                     onClick={() =>
@@ -435,7 +438,7 @@ export function ProductsPage({
               </>
             ) : (
               <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500">
-                Nu am găsit produse pentru filtrele selectate.
+                {t('page.products.empty')}
               </div>
             )}
           </div>

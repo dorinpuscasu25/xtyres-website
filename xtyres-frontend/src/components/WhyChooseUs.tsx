@@ -5,27 +5,29 @@ import {
   BadgeCheckIcon,
   HeadphonesIcon } from
 'lucide-react';
+import { useTranslation } from '../lib/i18n';
 export function WhyChooseUs() {
+  const { t } = useTranslation();
   const features = [
   {
     icon: <ShieldCheckIcon className="w-10 h-10 text-amber-500" />,
-    title: 'Garanție',
-    desc: 'Toate produsele cu garanție oficială'
+    title: t('why.warranty.title'),
+    desc: t('why.warranty.desc')
   },
   {
     icon: <TruckIcon className="w-10 h-10 text-amber-500" />,
-    title: 'Livrare Rapidă',
-    desc: 'Livrare în toată Moldova'
+    title: t('why.delivery.title'),
+    desc: t('why.delivery.desc')
   },
   {
     icon: <BadgeCheckIcon className="w-10 h-10 text-amber-500" />,
-    title: 'Calitate Premium',
-    desc: 'Doar branduri de încredere'
+    title: t('why.quality.title'),
+    desc: t('why.quality.desc')
   },
   {
     icon: <HeadphonesIcon className="w-10 h-10 text-amber-500" />,
-    title: 'Suport 24/7',
-    desc: 'Suntem mereu la dispoziția ta'
+    title: t('why.support.title'),
+    desc: t('why.support.desc')
   }];
 
   return (

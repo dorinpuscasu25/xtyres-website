@@ -22,16 +22,16 @@ export function CartPage({ onNavigate }: CartPageProps) {
             <ShoppingBagIcon className="w-10 h-10 text-slate-300" />
           </div>
           <h1 className="text-2xl font-heading font-black text-slate-900 uppercase tracking-wide mb-4">
-            Coșul tău este gol
+            {t('cart.empty')}
           </h1>
           <p className="text-slate-500 mb-8">
-            Nu ai adăugat încă niciun produs în coșul de cumpărături.
+            {t('cart.empty_description')}
           </p>
           <button
             onClick={() => onNavigate('products')}
             className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm">
             
-            Continuă cumpărăturile
+            {t('btn.continue_shopping')}
           </button>
         </div>
       </main>);
@@ -49,20 +49,20 @@ export function CartPage({ onNavigate }: CartPageProps) {
             {t('nav.home')}
           </button>
           <ChevronRightIcon className="w-4 h-4 mx-2" />
-          <span className="text-slate-900">Coșul tău</span>
+          <span className="text-slate-900">{t('cart.title')}</span>
         </div>
 
         <h1 className="text-3xl md:text-4xl font-heading font-black text-slate-900 uppercase tracking-wide mb-8">
-          Coșul Tău
+          {t('cart.title')}
         </h1>
 
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
           {/* Desktop Header */}
           <div className="hidden md:grid grid-cols-12 gap-4 p-6 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-            <div className="col-span-6">Produs</div>
-            <div className="col-span-2 text-center">Preț</div>
-            <div className="col-span-2 text-center">Cantitate</div>
-            <div className="col-span-2 text-right">Total</div>
+            <div className="col-span-6">{t('cart.product')}</div>
+            <div className="col-span-2 text-center">{t('cart.price')}</div>
+            <div className="col-span-2 text-center">{t('cart.quantity')}</div>
+            <div className="col-span-2 text-right">{t('cart.total')}</div>
           </div>
 
           {/* Cart Items */}
@@ -96,7 +96,7 @@ export function CartPage({ onNavigate }: CartPageProps) {
 
                 <div className="col-span-2 flex justify-between md:justify-center items-center mb-4 md:mb-0">
                   <span className="md:hidden text-sm font-bold text-slate-500 uppercase tracking-wider">
-                    Preț:
+                    {t('cart.price')}:
                   </span>
                   <span className="font-bold text-slate-900">
                     {item.product.price} MDL
@@ -105,7 +105,7 @@ export function CartPage({ onNavigate }: CartPageProps) {
 
                 <div className="col-span-2 flex justify-between md:justify-center items-center mb-4 md:mb-0">
                   <span className="md:hidden text-sm font-bold text-slate-500 uppercase tracking-wider">
-                    Cantitate:
+                    {t('cart.quantity')}:
                   </span>
                   <div className="flex items-center border border-slate-200 rounded-md h-10 w-28">
                     <button
@@ -132,7 +132,7 @@ export function CartPage({ onNavigate }: CartPageProps) {
 
                 <div className="col-span-2 flex justify-between md:justify-end items-center">
                   <span className="md:hidden text-sm font-bold text-slate-500 uppercase tracking-wider">
-                    Total:
+                    {t('cart.total')}
                   </span>
                   <div className="flex items-center">
                     <span className="text-lg font-heading font-black text-amber-500 mr-4">
@@ -157,13 +157,13 @@ export function CartPage({ onNavigate }: CartPageProps) {
             onClick={() => onNavigate('products')}
             className="px-8 py-4 border-2 border-slate-200 hover:border-slate-900 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm w-full md:w-auto text-center">
             
-            Continuă cumpărăturile
+            {t('btn.continue_shopping')}
           </button>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 w-full md:w-96">
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-bold text-slate-900 uppercase tracking-wider">
-                Subtotal
+                {t('cart.subtotal')}
               </span>
               <span className="text-2xl font-heading font-black text-slate-900">
                 {totalPrice} MDL
@@ -179,7 +179,7 @@ export function CartPage({ onNavigate }: CartPageProps) {
               onClick={() => onNavigate('checkout')}
               className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm">
               
-              Continuă la Checkout
+              {t('cart.checkout')}
             </motion.button>
           </div>
         </div>

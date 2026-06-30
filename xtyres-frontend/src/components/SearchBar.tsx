@@ -120,7 +120,7 @@ export function SearchBar({ onNavigate }: SearchBarProps) {
             </div> :
 
         <div className="p-4 text-center text-sm text-slate-500">
-              Nu am găsit rezultate pentru "{query}"
+              {t('search.no_results', { query })}
             </div>
         }
         </div>

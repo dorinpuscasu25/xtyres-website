@@ -7,6 +7,8 @@ import {
   InstagramIcon } from
 'lucide-react';
 import { useStorefront } from '../lib/storefront';
+import { useTranslation } from '../lib/i18n';
+import { buildRouteFromNavigation, updateBrowserUrl } from '../lib/router';
 const TikTokIcon = ({ className }: {className?: string;}) =>
 <svg
   viewBox="0 0 24 24"
@@ -20,6 +22,7 @@ const TikTokIcon = ({ className }: {className?: string;}) =>
     <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
   </svg>;
 export function Footer() {
+  const { t } = useTranslation();
   const { bootstrap } = useStorefront();
   const settings = bootstrap?.settings;
   const menu = bootstrap?.menu ?? [];
@@ -42,7 +45,7 @@ export function Footer() {
             </a>
             <p className="text-slate-400 leading-relaxed mb-6">
               {settings?.footerText ||
-              'Suntem magazinul tău de încredere pentru anvelope și servicii auto de calitate premium în Chișinău.'}
+              t('footer.default_text')}
             </p>
             <div className="flex space-x-4">
               {(settings?.socialLinks || []).map((item) => {
@@ -65,32 +68,48 @@ export function Footer() {
 
           <div>
             <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider mb-6">
-              Serviciile Noastre
+              {t('footer.services')}
             </h3>
             <ul className="space-y-3">
-              <li>Vulcanizare</li>
-              <li>Echilibrare Roți</li>
-              <li>Îndreptare Jante</li>
-              <li>Montare Anvelope</li>
-              <li>Diagnoză baterii</li>
+              <li>{t('service.vulcanization.title')}</li>
+              <li>{t('service.balance.title')}</li>
+              <li>{t('service.rims.title')}</li>
+              <li>{t('footer.mounting')}</li>
+              <li>{t('footer.battery_diagnostics')}</li>
             </ul>
           </div>
 
           <div>
             <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider mb-6">
-              Link-uri Utile
+              {t('footer.useful_links')}
             </h3>
             <ul className="space-y-3">
               {menu.map((category) =>
               <li key={category.id}>
-                  <a href="#catalog" className="hover:text-amber-500 transition-colors">
+                  <a
+                    href={`/catalog/${category.slug}`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      updateBrowserUrl(buildRouteFromNavigation('products', {
+                        categorySlug: category.slug,
+                      }));
+                      window.dispatchEvent(new PopStateEvent('popstate'));
+                    }}
+                    className="hover:text-amber-500 transition-colors">
                     {category.name}
                   </a>
                 </li>
               )}
               <li>
-                <a href="#" className="hover:text-amber-500 transition-colors">
-                  Despre Noi
+                <a
+                  href="/about"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    updateBrowserUrl(buildRouteFromNavigation('about'));
+                    window.dispatchEvent(new PopStateEvent('popstate'));
+                  }}
+                  className="hover:text-amber-500 transition-colors">
+                  {t('footer.about')}
                 </a>
               </li>
             </ul>
@@ -98,12 +117,12 @@ export function Footer() {
 
           <div>
             <h3 className="text-lg font-heading font-bold text-white uppercase tracking-wider mb-6">
-              Contact
+              {t('footer.contact')}
             </h3>
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPinIcon className="w-5 h-5 text-amber-500 mr-3 mt-1 flex-shrink-0" />
-                <span>{settings?.contactAddress || 'mun. Chișinău, str. Vadul lui Vodă 21/1'}</span>
+                <span>{settings?.contactAddress || t('footer.default_address')}</span>
               </li>
               <li className="flex items-center">
                 <PhoneIcon className="w-5 h-5 text-amber-500 mr-3 flex-shrink-0" />
@@ -119,9 +138,9 @@ export function Footer() {
                 <ClockIcon className="w-5 h-5 text-amber-500 mr-3 mt-1 flex-shrink-0" />
                 <div>
                   <span className="block text-white font-medium">
-                    Program:
+                    {t('footer.schedule')}
                   </span>
-                  <span>{settings?.workingHours || 'Luni - Sâmbătă, 8:30 - 18:30'}</span>
+                  <span>{settings?.workingHours || t('footer.default_hours')}</span>
                 </div>
               </li>
             </ul>
@@ -129,13 +148,13 @@ export function Footer() {
         </div>
 
         <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500">
-          <p>© 2026 {settings?.siteName || 'XTyres.md'} — Toate drepturile rezervate.</p>
+          <p>© 2026 {settings?.siteName || 'XTyres.md'} - {t('footer.rights')}</p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <a href="#" className="hover:text-white transition-colors">
-              Termeni și Condiții
+              {t('footer.terms')}
             </a>
             <a href="#" className="hover:text-white transition-colors">
-              Politica de Confidențialitate
+              {t('footer.privacy')}
             </a>
           </div>
         </div>

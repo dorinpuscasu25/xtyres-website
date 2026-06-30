@@ -27,7 +27,7 @@ export function FeaturedProducts({
             onClick={() => onNavigate('products')}
             className="hidden md:flex items-center text-slate-600 hover:text-amber-500 font-semibold transition-colors mt-4 md:mt-0">
             
-            Vezi toate produsele <ArrowRightIcon className="w-4 h-4 ml-2" />
+            {t('btn.view_all_products')} <ArrowRightIcon className="w-4 h-4 ml-2" />
           </button>
         </div>
 
@@ -45,7 +45,7 @@ export function FeaturedProducts({
 
         {featuredProducts.length === 0 ?
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-10 text-center text-slate-500">
-            Produsele promovate vor apărea aici după ce le adaugi din admin.
+            {t('section.featured_empty')}
           </div> :
         null}
 
@@ -54,7 +54,7 @@ export function FeaturedProducts({
             onClick={() => onNavigate('products')}
             className="inline-flex items-center text-slate-900 hover:text-amber-500 font-bold uppercase tracking-wider transition-colors">
             
-            Vezi toate produsele <ArrowRightIcon className="w-4 h-4 ml-2" />
+            {t('btn.view_all_products')} <ArrowRightIcon className="w-4 h-4 ml-2" />
           </button>
         </div>
       </div>

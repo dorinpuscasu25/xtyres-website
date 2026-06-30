@@ -1,5 +1,21 @@
 import { motion } from 'framer-motion';
-export function HeroSection() {
+import { useTranslation } from '../lib/i18n';
+import { NavigateFn } from '../lib/navigation';
+
+interface HeroSectionProps {
+  onNavigate: NavigateFn;
+}
+
+export function HeroSection({ onNavigate }: HeroSectionProps) {
+  const { t } = useTranslation();
+
+  const scrollToServices = () => {
+    document.getElementById('services')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  };
+
   return (
     <section className="relative w-full bg-gradient-to-r from-slate-900 to-slate-800 overflow-hidden pt-20 pb-32 lg:pt-32 lg:pb-48 px-4">
       {/* Decorative background elements */}
@@ -24,11 +40,10 @@ export function HeroSection() {
           className="flex flex-col items-start text-left">
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-extrabold text-white leading-tight mb-6 uppercase tracking-wide">
-            Găsește Anvelopele <span className="text-amber-500">Perfecte</span>
+            {t('hero.title.before')} <span className="text-amber-500">{t('hero.title.accent')}</span>
           </h1>
           <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-lg">
-            Calitate, siguranță și profesionalism într-un singur loc.
-            Echipează-ți mașina pentru orice drum.
+            {t('hero.subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
             <motion.button
@@ -38,9 +53,10 @@ export function HeroSection() {
               whileTap={{
                 scale: 0.98
               }}
+              onClick={() => onNavigate('products')}
               className="px-8 py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm">
               
-              Caută Anvelope
+              {t('hero.search_tires')}
             </motion.button>
             <motion.button
               whileHover={{
@@ -49,9 +65,10 @@ export function HeroSection() {
               whileTap={{
                 scale: 0.98
               }}
+              onClick={scrollToServices}
               className="px-8 py-4 bg-transparent border-2 border-slate-600 hover:border-white text-white font-bold rounded-md transition-colors uppercase tracking-wider text-sm">
               
-              Serviciile Noastre
+              {t('hero.services')}
             </motion.button>
           </div>
         </motion.div>

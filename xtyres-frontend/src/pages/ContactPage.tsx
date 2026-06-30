@@ -50,30 +50,30 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
             className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-10">
             
             <h2 className="text-2xl font-heading font-bold text-slate-900 mb-6">
-              Scrie-ne un mesaj
+              {t('contact.form_title')}
             </h2>
             <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <input
                   type="text"
                   className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50"
-                  placeholder="Numele tău" />
+                  placeholder={t('contact.name')} />
                 
                 <input
                   type="tel"
                   className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50"
-                  placeholder="Telefon" />
+                  placeholder={t('contact.phone')} />
                 
               </div>
               <input
                 type="email"
                 className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50"
-                placeholder="Email" />
+                placeholder={t('contact.email')} />
               
               <textarea
                 rows={5}
                 className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50 resize-none"
-                placeholder="Cu ce te putem ajuta?">
+                placeholder={t('contact.message')}>
               </textarea>
               <motion.button
                 whileHover={{
@@ -110,10 +110,10 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
               <div>
                 <h3 className="text-lg font-heading font-bold text-slate-900 uppercase tracking-wider mb-2">
-                  Adresă
+                  {t('contact.address')}
                 </h3>
                 <p className="text-slate-600 text-lg">
-                  {settings?.contactAddress || 'mun. Chișinău, str. Vadul lui Vodă 21/1'}
+                  {settings?.contactAddress || t('footer.default_address')}
                 </p>
               </div>
             </div>
@@ -124,7 +124,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
               <div>
                 <h3 className="text-lg font-heading font-bold text-slate-900 uppercase tracking-wider mb-2">
-                  Telefon
+                  {t('contact.phone')}
                 </h3>
                 <p className="text-slate-600 text-lg font-medium">
                   {settings?.phones?.[0] || '0 61 11 66 65'}
@@ -138,7 +138,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
               <div>
                 <h3 className="text-lg font-heading font-bold text-slate-900 uppercase tracking-wider mb-2">
-                  Email
+                  {t('contact.email')}
                 </h3>
                 <p className="text-slate-600 text-lg">
                   {settings?.emails?.[0] || 'info@xtyres.md'}
@@ -152,10 +152,10 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
               <div>
                 <h3 className="text-lg font-heading font-bold text-slate-900 uppercase tracking-wider mb-2">
-                  Program
+                  {t('contact.schedule')}
                 </h3>
                 <p className="text-slate-600 text-lg">
-                  {settings?.workingHours || 'Luni - Sâmbătă: 8:30 - 18:30'}
+                  {settings?.workingHours || t('footer.default_hours')}
                 </p>
               </div>
             </div>
@@ -170,7 +170,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               Google Maps
             </span>
             <span className="text-sm mt-2">
-              {settings?.contactAddress || 'mun. Chișinău, str. Vadul lui Vodă 21/1'}
+              {settings?.contactAddress || t('footer.default_address')}
             </span>
           </div>
         </div>

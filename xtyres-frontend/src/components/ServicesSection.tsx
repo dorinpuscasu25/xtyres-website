@@ -1,38 +1,37 @@
 import { motion } from 'framer-motion';
 import { WrenchIcon, CircleDotIcon, SettingsIcon } from 'lucide-react';
+import { useTranslation } from '../lib/i18n';
 export function ServicesSection() {
+  const { t } = useTranslation();
   const services = [
   {
-    title: 'Vulcanizare',
-    description:
-    'Reparatii anvelope, echilibrat roti, îndreptat jante, montat jante, montat anvelope, presiune cu aer-azot.',
+    title: t('service.vulcanization.title'),
+    description: t('service.vulcanization.description'),
     icon: <WrenchIcon className="w-6 h-6 sm:w-8 sm:h-8 text-slate-900" />
   },
   {
-    title: 'Echilibrare Roți',
-    description:
-    'O roata echilibrata face diferenta intre un condus placut sau unul dezastruos.',
+    title: t('service.balance.title'),
+    description: t('service.balance.description'),
     icon: <CircleDotIcon className="w-6 h-6 sm:w-8 sm:h-8 text-slate-900" />
   },
   {
-    title: 'Îndreptare Jante',
-    description:
-    'Personal calificat si experimentat in acest domeniu, putand indrepta orice janta indiferent de gradul de avarie.',
+    title: t('service.rims.title'),
+    description: t('service.rims.description'),
     icon: <SettingsIcon className="w-6 h-6 sm:w-8 sm:h-8 text-slate-900" />
   }];
 
   return (
-    <section className="py-24 px-4 bg-slate-900 text-white relative overflow-hidden">
+    <section id="services" className="py-24 px-4 bg-slate-900 text-white relative overflow-hidden scroll-mt-24">
       {/* Decorative background */}
       <div className="absolute top-0 right-0 w-1/2 h-full bg-slate-800/30 skew-x-12 translate-x-1/4 pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-heading font-bold text-white uppercase tracking-wide mb-4">
-            Serviciile Noastre
+            {t('section.services')}
           </h2>
           <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-            Calitate, siguranță și profesionalism într-un singur loc
+            {t('section.services_subtitle')}
           </p>
           <div className="w-24 h-1 bg-amber-500 mx-auto mt-6 rounded-full"></div>
         </div>
