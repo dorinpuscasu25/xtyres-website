@@ -9,6 +9,10 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '../lib/i18n';
 import { useStorefront } from '../lib/storefront';
 import { NavigateFn } from '../lib/navigation';
+import { getPhoneHref } from '../lib/contact';
+
+const GOOGLE_MAPS_EMBED_URL = 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4256.413566141774!2d28.875919500000002!3d47.0290044!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40c97da956281505%3A0xaf03391942035628!2sCentru%20de%20anvelope%20Xtyres!5e1!3m2!1sen!2s!4v1785919557145!5m2!1sen!2s';
+
 interface ContactPageProps {
   onNavigate: NavigateFn;
 }
@@ -16,6 +20,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
   const { t } = useTranslation();
   const { bootstrap } = useStorefront();
   const settings = bootstrap?.settings;
+  const primaryPhone = settings?.phones?.[0] || '0 61 11 66 65';
   return (
     <main className="flex-grow bg-slate-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
@@ -34,77 +39,12 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
           {t('page.contact.title')}
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-          <motion.div
-            initial={{
-              opacity: 0,
-              x: -20
-            }}
-            animate={{
-              opacity: 1,
-              x: 0
-            }}
-            transition={{
-              duration: 0.5
-            }}
-            className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-10">
-            
-            <h2 className="text-2xl font-heading font-bold text-slate-900 mb-6">
-              {t('contact.form_title')}
-            </h2>
-            <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <input
-                  type="text"
-                  className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50"
-                  placeholder={t('contact.name')} />
-                
-                <input
-                  type="tel"
-                  className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50"
-                  placeholder={t('contact.phone')} />
-                
-              </div>
-              <input
-                type="email"
-                className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50"
-                placeholder={t('contact.email')} />
-              
-              <textarea
-                rows={5}
-                className="w-full px-4 py-3 rounded-md border border-slate-200 bg-slate-50 resize-none"
-                placeholder={t('contact.message')}>
-              </textarea>
-              <motion.button
-                whileHover={{
-                  scale: 1.02
-                }}
-                whileTap={{
-                  scale: 0.98
-                }}
-                className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm">
-                
-                {t('btn.send_message')}
-              </motion.button>
-            </form>
-          </motion.div>
-
-          <motion.div
-            initial={{
-              opacity: 0,
-              x: 20
-            }}
-            animate={{
-              opacity: 1,
-              x: 0
-            }}
-            transition={{
-              duration: 0.5,
-              delay: 0.2
-            }}
-            className="flex flex-col justify-center space-y-8">
-            
-            <div className="flex items-start">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            <div className="flex items-start bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
               <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mr-6">
                 <MapPinIcon className="w-6 h-6 text-amber-600" />
               </div>
@@ -118,7 +58,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
             </div>
 
-            <div className="flex items-start">
+            <div className="flex items-start bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
               <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mr-6">
                 <PhoneIcon className="w-6 h-6 text-amber-600" />
               </div>
@@ -126,13 +66,15 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
                 <h3 className="text-lg font-heading font-bold text-slate-900 uppercase tracking-wider mb-2">
                   {t('contact.phone')}
                 </h3>
-                <p className="text-slate-600 text-lg font-medium">
-                  {settings?.phones?.[0] || '0 61 11 66 65'}
-                </p>
+                <a
+                  href={getPhoneHref(primaryPhone)}
+                  className="text-slate-600 hover:text-amber-600 transition-colors text-lg font-medium">
+                  {primaryPhone}
+                </a>
               </div>
             </div>
 
-            <div className="flex items-start">
+            <div className="flex items-start bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
               <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mr-6">
                 <MailIcon className="w-6 h-6 text-amber-600" />
               </div>
@@ -146,7 +88,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               </div>
             </div>
 
-            <div className="flex items-start">
+            <div className="flex items-start bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8">
               <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mr-6">
                 <ClockIcon className="w-6 h-6 text-amber-600" />
               </div>
@@ -159,20 +101,19 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
                 </p>
               </div>
             </div>
-          </motion.div>
-        </div>
+        </motion.div>
 
-        <div className="w-full h-96 bg-slate-200 rounded-2xl overflow-hidden relative flex items-center justify-center border border-slate-300">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-          <div className="flex flex-col items-center text-slate-500 z-10">
-            <MapPinIcon className="w-12 h-12 mb-4 text-slate-400" />
-            <span className="text-xl font-heading font-bold uppercase tracking-widest">
-              Google Maps
-            </span>
-            <span className="text-sm mt-2">
-              {settings?.contactAddress || t('footer.default_address')}
-            </span>
-          </div>
+        <div className="w-full h-[450px] rounded-2xl overflow-hidden border border-slate-300 shadow-sm">
+          <iframe
+            src={GOOGLE_MAPS_EMBED_URL}
+            title="Centru de anvelope Xtyres pe Google Maps"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin">
+          </iframe>
         </div>
       </div>
     </main>);

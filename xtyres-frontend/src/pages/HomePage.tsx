@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { HeroSection } from '../components/HeroSection';
 import { TireSearchForm } from '../components/TireSearchForm';
 import { CategoryCards } from '../components/CategoryCards';
 import { FeaturedProducts } from '../components/FeaturedProducts';
@@ -33,7 +32,6 @@ export function HomePage({ onNavigate }: HomePageProps) {
   }, [locale]);
   return (
     <main className="flex-grow">
-      <HeroSection onNavigate={onNavigate} />
       <TireSearchForm onNavigate={onNavigate} />
       <CategoryCards categories={featuredCategories} onNavigate={onNavigate} />
       <FeaturedProducts products={featuredProducts} onNavigate={onNavigate} />

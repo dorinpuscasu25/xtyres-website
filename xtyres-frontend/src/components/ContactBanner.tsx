@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { PhoneCallIcon } from 'lucide-react';
 import { useTranslation } from '../lib/i18n';
 import { NavigateFn } from '../lib/navigation';
+import { useStorefront } from '../lib/storefront';
+import { getPhoneHref } from '../lib/contact';
 
 interface ContactBannerProps {
   onNavigate: NavigateFn;
@@ -9,6 +11,8 @@ interface ContactBannerProps {
 
 export function ContactBanner({ onNavigate }: ContactBannerProps) {
   const { t } = useTranslation();
+  const { bootstrap } = useStorefront();
+  const primaryPhone = bootstrap?.settings?.phones?.[0] || '0 61 11 66 65';
 
   return (
     <section className="py-16 px-4 bg-amber-500 relative overflow-hidden">
@@ -26,9 +30,12 @@ export function ContactBanner({ onNavigate }: ContactBannerProps) {
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="flex items-center text-slate-900 font-bold text-2xl">
-            <PhoneCallIcon className="w-6 h-6 mr-3" />0 61 11 66 65
-          </div>
+          <a
+            href={getPhoneHref(primaryPhone)}
+            className="flex items-center text-slate-900 hover:text-slate-700 transition-colors font-bold text-2xl">
+            <PhoneCallIcon className="w-6 h-6 mr-3" />
+            {primaryPhone}
+          </a>
           <motion.button
             whileHover={{
               scale: 1.05

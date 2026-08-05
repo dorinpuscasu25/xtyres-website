@@ -402,8 +402,8 @@ class StoreDemoSeeder extends Seeder
             'emails' => ['info@xtyres.md'],
             'phones' => ['+373 61 11 66 65'],
             'social_links' => [
-                ['name' => 'facebook', 'url' => 'https://facebook.com/xtyres'],
-                ['name' => 'instagram', 'url' => 'https://instagram.com/xtyres'],
+                ['name' => 'facebook', 'url' => 'https://www.facebook.com/xtyresmd'],
+                ['name' => 'instagram', 'url' => 'https://www.instagram.com/xtyres.md/'],
             ],
         ]);
 

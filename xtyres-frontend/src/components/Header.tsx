@@ -17,6 +17,7 @@ import { useCart } from '../lib/cart';
 import { CartDropdown } from './CartDropdown';
 import { useStorefront } from '../lib/storefront';
 import { NavigateFn } from '../lib/navigation';
+import { getPhoneHref, getSocialUrl } from '../lib/contact';
 const TikTokIcon = ({ className }: {className?: string;}) =>
 <svg
   viewBox="0 0 24 24"
@@ -42,6 +43,7 @@ export function Header({ onNavigate }: HeaderProps) {
   const { bootstrap } = useStorefront();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const settings = bootstrap?.settings;
+  const primaryPhone = settings?.phones?.[0] || '+373 61 11 66 65';
   const headerLogoUrl = settings?.headerLogoUrl || DEFAULT_HEADER_LOGO;
   const menu = bootstrap?.menu ?? [];
   const socialMap = {
@@ -58,12 +60,14 @@ export function Header({ onNavigate }: HeaderProps) {
       <div className="bg-slate-900 text-slate-300 py-2 px-4 hidden md:block">
         <div className="max-w-7xl mx-auto flex justify-between items-center text-sm">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
+            <a
+              href={getPhoneHref(primaryPhone)}
+              className="flex items-center space-x-2 hover:text-amber-500 transition-colors">
               <PhoneIcon className="w-4 h-4 text-amber-500" />
-              <span className="font-medium text-white">
-                {settings?.phones?.[0] || '+373 61 11 66 65'}
+              <span className="font-medium text-white hover:text-amber-500 transition-colors">
+                {primaryPhone}
               </span>
-            </div>
+            </a>
             <div className="flex items-center space-x-2">
               <ClockIcon className="w-4 h-4 text-amber-500" />
               <span>{settings?.workingHours || 'Luni - Sâmbătă, 8:30 - 18:30'}</span>
@@ -82,9 +86,10 @@ export function Header({ onNavigate }: HeaderProps) {
                 return (
                   <a
                     key={item.name}
-                    href={item.url}
+                    href={getSocialUrl(item.name, item.url)}
                     target="_blank"
                     rel="noreferrer"
+                    aria-label={item.name}
                     className="text-slate-400 hover:text-amber-500 transition-colors">
                     
                     <Icon className="w-4 h-4" />
