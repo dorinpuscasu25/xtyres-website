@@ -167,18 +167,25 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
   };
 
   return (
-    <section className="w-full px-4 relative z-20 -mt-16 mb-20">
-      <div className="max-w-5xl mx-auto">
-        <motion.div
-          className="bg-white rounded-xl shadow-2xl p-6 md:p-8 border border-slate-100">
-          
-          <h2 className="text-xl font-heading font-bold text-slate-900 mb-6 uppercase tracking-wide flex items-center">
-            <span className="w-2 h-6 bg-amber-500 mr-3 rounded-sm"></span>
+    <section className="w-full px-4 py-12 md:py-16 bg-slate-900 relative overflow-hidden">
+      <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full border-[48px] border-white/[0.03] pointer-events-none"></div>
+      <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full border-[56px] border-amber-500/[0.04] pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-heading font-black text-white uppercase tracking-wide">
             {t('quick_search.title')}
           </h2>
+          <div className="w-16 h-1 bg-amber-500 mx-auto mt-4 rounded-full"></div>
+        </div>
 
-          <div className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 flex-grow w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="bg-white rounded-2xl shadow-xl shadow-black/20 p-5 sm:p-6 md:p-8 border border-white/10">
+          <div className="flex flex-col lg:flex-row gap-5 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-grow w-full">
               {/* Step 1 */}
               <div className="flex flex-col">
                 <label className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider flex items-center">
@@ -192,7 +199,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     value={diameter}
                     onChange={(event) => setDiameter(event.target.value)}
                     disabled={isLoading || !diameterFilter}
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
+                    className="w-full h-[52px] appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium transition-shadow disabled:cursor-not-allowed disabled:opacity-60">
                     <option value="">{t('quick_search.choose_diameter')}</option>
                     {diameterOptions.map((option) =>
                     <option key={option.value} value={option.value}>
@@ -217,7 +224,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     value={width}
                     onChange={(event) => setWidth(event.target.value)}
                     disabled={isLoading || !widthFilter}
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
+                    className="w-full h-[52px] appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium transition-shadow disabled:cursor-not-allowed disabled:opacity-60">
                     <option value="">{t('quick_search.choose_width')}</option>
                     {widthOptions.map((option) =>
                     <option key={option.value} value={option.value}>
@@ -242,7 +249,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     value={height}
                     onChange={(event) => setHeight(event.target.value)}
                     disabled={isLoading || !heightFilter}
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
+                    className="w-full h-[52px] appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium transition-shadow disabled:cursor-not-allowed disabled:opacity-60">
                     <option value="">{t('quick_search.choose_height')}</option>
                     {heightOptions.map((option) =>
                     <option key={option.value} value={option.value}>
@@ -267,7 +274,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                     value={season}
                     onChange={(event) => setSeason(event.target.value)}
                     disabled={isLoading || !seasonFilter}
-                    className="w-full appearance-none bg-slate-50 border border-slate-200 text-slate-900 py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60">
+                    className="w-full h-[52px] appearance-none bg-slate-50 border border-slate-200 text-slate-900 px-4 pr-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent cursor-pointer font-medium transition-shadow disabled:cursor-not-allowed disabled:opacity-60">
                     <option value="">{t('quick_search.choose_season')}</option>
                     {seasonOptions.map((option) =>
                     <option key={option.value} value={option.value}>
@@ -288,7 +295,7 @@ export function TireSearchForm({ onNavigate }: TireSearchFormProps) {
                 scale: 0.98
               }}
               onClick={submit}
-              className="w-full md:w-auto px-8 py-3 h-[50px] bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm whitespace-nowrap">
+              className="w-full lg:w-auto px-10 h-[52px] bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg transition-colors uppercase tracking-wider text-sm whitespace-nowrap shadow-md shadow-amber-500/20">
               
               {isLoading ? t('btn.loading') : t('btn.search')}
             </motion.button>
