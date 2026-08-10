@@ -115,7 +115,16 @@ const translations = {
     'footer.default_address': 'mun. Chișinău, str. Vadul lui Vodă 21/1',
     'footer.default_hours': 'Luni - Sâmbătă, 8:30 - 18:30',
     'footer.mounting': 'Montare anvelope',
-    'footer.battery_diagnostics': 'Diagnoză baterii'
+    'footer.battery_diagnostics': 'Diagnoză baterii',
+    'thank_you.eyebrow': 'Trimitere reușită',
+    'thank_you.order_title': 'Comandă plasată!',
+    'thank_you.request_title': 'Îți mulțumim!',
+    'thank_you.order_message': 'Am primit comanda ta. Un operator te va contacta în scurt timp pentru confirmare.',
+    'thank_you.request_message': 'Am primit solicitarea ta. Echipa noastră te va contacta în cel mai scurt timp.',
+    'thank_you.order_number': 'Număr comandă',
+    'thank_you.reference': 'Număr de referință',
+    'thank_you.home': 'Pagina principală',
+    'thank_you.products': 'Vezi produsele'
   },
   ru: {
     'nav.home': 'Главная',
@@ -231,7 +240,16 @@ const translations = {
     'footer.default_address': 'мун. Кишинев, ул. Вадул луй Водэ 21/1',
     'footer.default_hours': 'Понедельник - Суббота, 8:30 - 18:30',
     'footer.mounting': 'Монтаж шин',
-    'footer.battery_diagnostics': 'Диагностика аккумуляторов'
+    'footer.battery_diagnostics': 'Диагностика аккумуляторов',
+    'thank_you.eyebrow': 'Успешно отправлено',
+    'thank_you.order_title': 'Заказ оформлен!',
+    'thank_you.request_title': 'Спасибо!',
+    'thank_you.order_message': 'Мы получили ваш заказ. Оператор свяжется с вами в ближайшее время для подтверждения.',
+    'thank_you.request_message': 'Мы получили ваш запрос. Наша команда свяжется с вами в ближайшее время.',
+    'thank_you.order_number': 'Номер заказа',
+    'thank_you.reference': 'Номер обращения',
+    'thank_you.home': 'На главную',
+    'thank_you.products': 'Смотреть товары'
   }
 };
 interface I18nContextType {

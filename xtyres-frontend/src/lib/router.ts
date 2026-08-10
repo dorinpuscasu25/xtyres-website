@@ -8,7 +8,8 @@ export type AppPage =
   | 'contact'
   | 'about'
   | 'cart'
-  | 'checkout';
+  | 'checkout'
+  | 'thank-you';
 
 export interface AppRoute {
   page: AppPage;
@@ -22,6 +23,8 @@ export interface AppRoute {
   brandIds: number[];
   priceMin: number | null;
   priceMax: number | null;
+  submissionType?: 'order' | 'request' | 'message';
+  reference?: string;
 }
 
 const emptyRouteState = {
@@ -196,6 +199,19 @@ export function parseRoute(pathname: string, search: string): AppRoute {
     return { page: 'checkout', ...emptyRouteState };
   }
 
+  if (normalizedPathname === '/thank-you' || normalizedPathname === '/multumim') {
+    const type = params.get('type');
+
+    return {
+      page: 'thank-you',
+      submissionType: type === 'order' || type === 'request' || type === 'message'
+        ? type
+        : 'request',
+      reference: params.get('reference') || undefined,
+      ...emptyRouteState,
+    };
+  }
+
   return {
     page: 'home',
     ...emptyRouteState,
@@ -267,6 +283,17 @@ export function buildRouteUrl(route: AppRoute): string {
     return '/checkout';
   }
 
+  if (route.page === 'thank-you') {
+    const params = new URLSearchParams();
+    params.set('type', route.submissionType || 'request');
+
+    if (route.reference) {
+      params.set('reference', route.reference);
+    }
+
+    return `/thank-you?${params.toString()}`;
+  }
+
   return '/';
 }
 
@@ -330,6 +357,17 @@ export function buildRouteFromNavigation(
   if (page === 'contact' || page === 'about' || page === 'cart' || page === 'checkout') {
     return {
       page,
+      ...emptyRouteState,
+    };
+  }
+
+  if (page === 'thank-you') {
+    const details = payload && typeof payload !== 'number' ? payload : undefined;
+
+    return {
+      page: 'thank-you',
+      submissionType: details?.submissionType || 'request',
+      reference: details?.reference,
       ...emptyRouteState,
     };
   }

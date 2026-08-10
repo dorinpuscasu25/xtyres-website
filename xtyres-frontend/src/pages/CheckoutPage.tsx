@@ -1,6 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { ChevronRightIcon, CheckCircleIcon } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ChevronRightIcon } from 'lucide-react';
 import { useCart } from '../lib/cart';
 import { storefrontApi } from '../lib/api';
 import { useTranslation } from '../lib/i18n';
@@ -11,10 +10,8 @@ interface CheckoutPageProps {
 export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
   const { t, locale } = useTranslation();
   const { items, totalPrice, clearCart } = useCart();
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -53,9 +50,11 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
           quantity: item.quantity
         }))
       });
-      setOrderNumber(response.order.orderNumber);
-      setIsSubmitted(true);
       clearCart();
+      onNavigate('thank-you', {
+        submissionType: 'order',
+        reference: response.order.orderNumber,
+      }, { replace: true });
     } catch (error) {
       setSubmitError(
         error instanceof Error ?
@@ -66,45 +65,6 @@ export function CheckoutPage({ onNavigate }: CheckoutPageProps) {
       setIsSubmitting(false);
     }
   };
-  if (isSubmitted) {
-    return (
-      <main className="flex-grow bg-slate-50 py-20 flex items-center justify-center">
-        <motion.div
-          initial={{
-            opacity: 0,
-            scale: 0.9
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1
-          }}
-          className="max-w-md w-full px-4 text-center">
-          
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircleIcon className="w-12 h-12 text-green-500" />
-          </div>
-          <h1 className="text-3xl font-heading font-black text-slate-900 uppercase tracking-wide mb-4">
-            Comandă Plasată!
-          </h1>
-          <p className="text-slate-600 mb-8 text-lg">
-            Îți mulțumim pentru comandă. Vei fi contactat în scurt timp de un
-            operator pentru confirmare.
-          </p>
-          {orderNumber &&
-          <p className="text-sm font-bold text-slate-500 mb-6">
-              Număr comandă: {orderNumber}
-            </p>
-          }
-          <button
-            onClick={() => onNavigate('home')}
-            className="w-full py-4 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold rounded-md transition-colors uppercase tracking-wider text-sm">
-            
-            Întoarce-te la pagina principală
-          </button>
-        </motion.div>
-      </main>);
-
-  }
   if (items.length === 0) {
     return (
       <main className="flex-grow bg-slate-50 py-16 flex items-center justify-center">

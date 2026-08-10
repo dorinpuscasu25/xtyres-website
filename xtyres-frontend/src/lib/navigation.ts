@@ -13,6 +13,8 @@ export type NavigatePayload =
       brandIds?: number[];
       priceMin?: number | null;
       priceMax?: number | null;
+      submissionType?: 'order' | 'request' | 'message';
+      reference?: string;
     };
 
 export interface NavigationOptions {

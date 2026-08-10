@@ -13,6 +13,7 @@ import { ContactPage } from './pages/ContactPage';
 import { AboutPage } from './pages/AboutPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
+import { ThankYouPage } from './pages/ThankYouPage';
 import { NavigatePayload, NavigationOptions } from './lib/navigation';
 import {
   AppRoute,
@@ -35,6 +36,8 @@ function genericTitle(route: AppRoute) {
       return 'Coș - XTyres';
     case 'checkout':
       return 'Finalizare comandă - XTyres';
+    case 'thank-you':
+      return 'Mulțumim - XTyres';
     default:
       return 'XTyres';
   }
@@ -104,6 +107,14 @@ export function App() {
         return <CartPage onNavigate={handleNavigate} />;
       case 'checkout':
         return <CheckoutPage onNavigate={handleNavigate} />;
+      case 'thank-you':
+        return (
+          <ThankYouPage
+            onNavigate={handleNavigate}
+            type={route.submissionType}
+            reference={route.reference}
+          />
+        );
       default:
         return <HomePage onNavigate={handleNavigate} />;
     }
