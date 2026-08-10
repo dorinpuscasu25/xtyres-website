@@ -1,5 +1,6 @@
 import { FormEvent, useState } from 'react';
 import { ChevronRightIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useCart } from '../lib/cart';
 import { storefrontApi } from '../lib/api';
 import { useTranslation } from '../lib/i18n';
