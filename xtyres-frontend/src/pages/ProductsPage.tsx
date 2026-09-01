@@ -58,6 +58,22 @@ function serializeAttributeFilters(
     );
 }
 
+function deserializeAttributeFilters(
+  filters: CatalogRequestFilter[],
+): Record<number, SelectedAttributeFilter> {
+  return filters.reduce<Record<number, SelectedAttributeFilter>>((accumulator, filter) => {
+    accumulator[filter.attribute_id] = {
+      type: filter.type,
+      values: filter.values || [],
+      min: filter.min !== undefined && filter.min !== null ? String(filter.min) : '',
+      max: filter.max !== undefined && filter.max !== null ? String(filter.max) : '',
+      value: filter.value,
+    };
+
+    return accumulator;
+  }, {});
+}
+
 export function ProductsPage({
   onNavigate,
   initialCategorySlug,
@@ -82,7 +98,7 @@ export function ProductsPage({
   const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>(initialBrandIds);
   const [selectedAttributeFilters, setSelectedAttributeFilters] = useState<
     Record<number, SelectedAttributeFilter>
-  >({});
+  >(() => deserializeAttributeFilters(initialFilters));
   const [priceRange, setPriceRange] = useState({
     min: initialPriceMin !== null ? String(initialPriceMin) : '',
     max: initialPriceMax !== null ? String(initialPriceMax) : '',
@@ -90,51 +106,10 @@ export function ProductsPage({
   const [sort, setSort] = useState(initialSort);
   const [isLoading, setIsLoading] = useState(false);
 
-  const initialFiltersKey = JSON.stringify(initialFilters);
-  const initialBrandIdsKey = initialBrandIds.join(',');
-
-  useEffect(() => {
-    setSelectedBrandIds(initialBrandIds);
-    setSelectedAttributeFilters(
-      initialFilters.reduce<Record<number, SelectedAttributeFilter>>((accumulator, filter) => {
-        accumulator[filter.attribute_id] = {
-          type: filter.type,
-          values: filter.values || [],
-          min:
-            filter.min !== undefined && filter.min !== null ? String(filter.min) : '',
-          max:
-            filter.max !== undefined && filter.max !== null ? String(filter.max) : '',
-          value: filter.value,
-        };
-
-        return accumulator;
-      }, {}),
-    );
-    setPriceRange({
-      min: initialPriceMin !== null ? String(initialPriceMin) : '',
-      max: initialPriceMax !== null ? String(initialPriceMax) : '',
-    });
-    setSort(initialSort);
-    setPagination((current) => ({
-      ...current,
-      currentPage: initialPage,
-    }));
-  }, [
-    initialCategorySlug,
-    initialQuery,
-    initialFiltersKey,
-    initialSort,
-    initialPage,
-    initialBrandIdsKey,
-    initialPriceMin,
-    initialPriceMax,
-  ]);
-
   const activeAttributeFilters = useMemo(
     () => serializeAttributeFilters(selectedAttributeFilters),
     [selectedAttributeFilters],
   );
-  const activeAttributeFiltersKey = JSON.stringify(activeAttributeFilters);
 
   useEffect(() => {
     updateBrowserUrl(
@@ -154,7 +129,7 @@ export function ProductsPage({
   }, [
     initialCategorySlug,
     initialQuery,
-    activeAttributeFiltersKey,
+    activeAttributeFilters,
     sort,
     pagination.currentPage,
     selectedBrandIds,
@@ -163,6 +138,8 @@ export function ProductsPage({
   ]);
 
   useEffect(() => {
+    let isCurrentRequest = true;
+
     setIsLoading(true);
     storefrontApi
       .catalog({
@@ -177,16 +154,28 @@ export function ProductsPage({
         filters: activeAttributeFilters,
       })
       .then((response) => {
+        if (!isCurrentRequest) return;
+
         setProducts(response.products);
         setFilters(response.filters);
         setPagination(response.pagination);
       })
       .catch((error) => {
+        if (!isCurrentRequest) return;
+
         console.error('Failed to load catalog', error);
         setProducts([]);
         setFilters(undefined);
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        if (isCurrentRequest) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
   }, [
     locale,
     initialCategorySlug,
@@ -196,7 +185,7 @@ export function ProductsPage({
     selectedBrandIds,
     priceRange.min,
     priceRange.max,
-    activeAttributeFiltersKey,
+    activeAttributeFilters,
   ]);
 
   const toggleBrand = (brandId: number) => {

@@ -17,6 +17,7 @@ import { ThankYouPage } from './pages/ThankYouPage';
 import { NavigatePayload, NavigationOptions } from './lib/navigation';
 import {
   AppRoute,
+  buildRouteUrl,
   buildRouteFromNavigation,
   parseCurrentRoute,
   updateBrowserUrl,
@@ -80,6 +81,7 @@ export function App() {
       case 'products':
         return (
           <ProductsPage
+            key={buildRouteUrl(route)}
             onNavigate={handleNavigate}
             initialCategorySlug={route.categorySlug}
             initialQuery={route.query}
