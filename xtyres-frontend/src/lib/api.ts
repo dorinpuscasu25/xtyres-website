@@ -221,7 +221,7 @@ export const storefrontApi = {
       locale: params.locale,
       category: params.category ?? undefined,
       q: params.q ?? undefined,
-      sort: params.sort ?? 'featured',
+      sort: params.sort ?? 'price_asc',
       page: params.page ?? 1,
       brand_ids: params.brandIds?.join(','),
       price_min: params.priceMin ?? undefined,

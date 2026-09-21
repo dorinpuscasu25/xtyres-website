@@ -176,7 +176,7 @@ class StorefrontController extends Controller
         $perPage = max(1, min(24, (int) $request->query('per_page', 12)));
         $page = max(1, (int) $request->query('page', 1));
         $search = trim((string) $request->query('q', ''));
-        $sort = (string) $request->query('sort', 'featured');
+        $sort = (string) $request->query('sort', 'price_asc');
         $categorySlug = $request->query('category');
         $brandIds = collect(explode(',', (string) $request->query('brand_ids', '')))
             ->filter()

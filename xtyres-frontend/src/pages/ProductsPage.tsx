@@ -79,7 +79,7 @@ export function ProductsPage({
   initialCategorySlug,
   initialQuery,
   initialFilters = [],
-  initialSort = 'featured',
+  initialSort = 'price_asc',
   initialPage = 1,
   initialBrandIds = [],
   initialPriceMin = null,

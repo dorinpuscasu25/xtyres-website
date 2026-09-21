@@ -64,7 +64,7 @@ export function ProductDetailPage({
       productId: product.id,
       productSlug: product.slug,
       filters: [],
-      sort: 'featured',
+      sort: 'price_asc',
       pageNumber: 1,
       brandIds: [],
       priceMin: null,

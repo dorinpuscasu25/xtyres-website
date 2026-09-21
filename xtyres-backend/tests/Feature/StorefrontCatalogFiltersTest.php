@@ -12,6 +12,29 @@ class StorefrontCatalogFiltersTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_catalog_sorts_products_by_price_ascending_by_default(): void
+    {
+        $category = Category::query()->create([
+            'name' => ['ro' => 'Anvelope', 'ru' => 'Шины'],
+            'slug' => ['ro' => 'anvelope', 'ru' => 'shiny'],
+            'description' => ['ro' => '', 'ru' => ''],
+            'is_active' => true,
+            'is_featured' => false,
+            'menu_order' => 0,
+        ]);
+
+        $width = $this->createFilterableAttribute('Lățime', 'latime', 1, $category);
+
+        $this->createProductWithNumberAttribute('SKU-SCUMP', $category, $width, 225, 500);
+        $this->createProductWithNumberAttribute('SKU-IEFTIN', $category, $width, 205, 100);
+
+        $response = $this->getJson('/api/storefront/catalog?locale=ro&category=anvelope');
+
+        $response->assertOk();
+        $response->assertJsonPath('products.0.sku', 'SKU-IEFTIN');
+        $response->assertJsonPath('products.1.sku', 'SKU-SCUMP');
+    }
+
     public function test_catalog_filters_keep_only_the_most_relevant_attribute_when_slugs_are_duplicated(): void
     {
         $category = Category::query()->create([
@@ -100,6 +123,7 @@ class StorefrontCatalogFiltersTest extends TestCase
         Category $category,
         Attribute $attribute,
         int $value,
+        int $price = 100,
     ): Product {
         $product = Product::query()->create([
             'name' => ['ro' => $sku, 'ru' => $sku],
@@ -110,7 +134,7 @@ class StorefrontCatalogFiltersTest extends TestCase
             'meta_keywords' => ['ro' => '', 'ru' => ''],
             'meta_description' => ['ro' => '', 'ru' => ''],
             'sku' => $sku,
-            'price' => 100,
+            'price' => $price,
             'compare_at_price' => null,
             'stock_quantity' => 10,
             'image_path' => null,

@@ -29,7 +29,7 @@ export interface AppRoute {
 
 const emptyRouteState = {
   filters: [] as CatalogRequestFilter[],
-  sort: 'featured',
+  sort: 'price_asc',
   pageNumber: 1,
   brandIds: [] as number[],
   priceMin: null,
@@ -141,7 +141,7 @@ export function parseRoute(pathname: string, search: string): AppRoute {
       categorySlug: params.get('category') || undefined,
       query: params.get('q') || undefined,
       filters: parseFilters(params.get('filters')),
-      sort: params.get('sort') || 'featured',
+      sort: params.get('sort') || 'price_asc',
       pageNumber: Number.isFinite(requestedPage) && requestedPage > 0 ? requestedPage : 1,
       brandIds: parseNumberList(params.get('brands')),
       priceMin: parseNumber(params.get('price_min')),
@@ -234,7 +234,7 @@ export function buildRouteUrl(route: AppRoute): string {
       params.set('q', route.query);
     }
 
-    if (route.sort && route.sort !== 'featured') {
+    if (route.sort && route.sort !== 'price_asc') {
       params.set('sort', route.sort);
     }
 
@@ -323,7 +323,7 @@ export function buildRouteFromNavigation(
         categorySlug: payload.categorySlug,
         query: payload.query,
         filters: payload.filters || [],
-        sort: payload.sort || 'featured',
+        sort: payload.sort || 'price_asc',
         pageNumber: payload.pageNumber || 1,
         brandIds: payload.brandIds || [],
         priceMin: payload.priceMin ?? null,
