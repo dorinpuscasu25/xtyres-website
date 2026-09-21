@@ -21,7 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zip \
     && curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && apt-get install -y --no-install-recommends nodejs \
-    && npm install -g npm@latest \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
