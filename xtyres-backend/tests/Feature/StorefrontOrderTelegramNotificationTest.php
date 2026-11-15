@@ -75,7 +75,7 @@ class StorefrontOrderTelegramNotificationTest extends TestCase
         $data = $request['options']['form_params'] ?? [];
 
         $this->assertSame(
-            'https://api.telegram.org/bot2018095725:AAGoJbONadK3LnkpA3_2UB0Y_RygRERQFGQ/sendMessage',
+            'https://api.telegram.org/bot9165960060:AAFHw7b2p6wnuLgQ9v0eFcuQ-ROLpttxvko/sendMessage',
             $request['url']
         );
         $this->assertSame('POST', $request['method']);

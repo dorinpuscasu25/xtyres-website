@@ -12,7 +12,7 @@ use Throwable;
 
 class TelegramOrderNotifier
 {
-    private const BOT_TOKEN = '2018095725:AAGoJbONadK3LnkpA3_2UB0Y_RygRERQFGQ';
+    private const BOT_TOKEN = '9165960060:AAFHw7b2p6wnuLgQ9v0eFcuQ-ROLpttxvko';
 
     private const CHAT_ID = '-583530233';
 
